@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>寵物每一天 - 概念原型</title>
+    <title>寵物每一天</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -269,7 +269,7 @@
             const getBreedRecommendation = () => {
                 if (pet.breed === '法式鬥牛犬' || pet.breed === '巴哥犬' || pet.breed === '英國鬥牛犬') return { name: '透氣防衝撞胸背帶', desc: '短吻品種呼吸道較短，使用胸背帶可大幅降低頸部與氣管壓力。', tag: '短吻必備', icon: 'fa-vest', color: 'text-purple-500' };
                 if (pet.breed === '柯基' || pet.breed === '臘腸狗') return { name: '寵物護脊斜坡階梯', desc: '短腿犬容易有脊椎負擔，應絕對避免讓牠們頻繁跳躍沙發。', tag: '護脊推薦', icon: 'fa-stairs', color: 'text-orange-500' };
-                if (pet.breed === '哈士奇' || pet.breed === '邊境牧羊犬' || pet.breed === '柴犬') return { name: '高難度益智漏食玩具', desc: '高智商且精力旺盛的犬種，需要益智玩具消耗腦力。', tag: '精力消耗', icon: 'fa-puzzle-piece', color: 'text-red-500' };
+                if (pet.breed === '哈士奇' || pet.breed === '邊境牧羊犬' || pet.breed === '柴犬') return { name: '高難度益智漏食玩具', desc: '高智商且精力旺盛的犬種，需要益智玩具消耗脑力。', tag: '精力消耗', icon: 'fa-puzzle-piece', color: 'text-red-500' };
                 if (pet.breed === '橘貓') return { name: '低碳水體重控制糧', desc: '「十隻橘貓九隻胖」，為了保護關節與心血管健康，請嚴格控管熱量！', tag: '易胖體質對策', icon: 'fa-weight-scale', color: 'text-orange-500' };
                 if (pet.breed === '英國短毛貓' || pet.breed === '美國短毛貓') return { name: '低敏排毛粉', desc: '毛髮濃密，換季時需加強排毛，避免引發毛球症影響食慾。', tag: '腸胃健康', icon: 'fa-seedling', color: 'text-green-500' };
                 
@@ -327,7 +327,7 @@
                         ) : (
                             <div class="bg-green-50 border-l-4 border-green-500 p-5 rounded-r-2xl shadow-sm">
                                 <p class="text-sm font-bold text-green-700 flex items-center"><i class="fa-regular fa-calendar-check mr-2"></i> 今日任務已達成！</p>
-                                <p class="text-xs text-green-600 mt-2 leading-relaxed">太棒了！今天已經記錄過 {pet.name} 的日常了，繼續保持！</p>
+                                <p class="text-xs text-green-600 mt-2 leading-relaxed">太棒了！今天已經記錄過 {pet.name} 的日常了，继续保持！</p>
                             </div>
                         )}
                     </div>
@@ -379,7 +379,7 @@
 
             useEffect(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages, isTyping]);
 
-            // 修改此區塊：使用 flexbox 原生流體佈局，不使用 absolute，解決遮擋問題
+            // 使用 flexbox 原生流體佈局，不使用 absolute，解決遮擋問題
             return (
                 <div class="flex flex-col h-full bg-gray-50 pb-[70px]">
                     {/* 頂部標題 */}
@@ -465,7 +465,20 @@
                 setIsSidebarOpen(false); 
             };
 
-            if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
+            // 【新增這部分】：在登入時，主動去撈取寵物資料
+            const handleLogin = (email) => {
+                setCurrentUser(email);
+                const usersDb = JSON.parse(localStorage.getItem(DB_KEY_USERS)) || {};
+                
+                // 如果這個帳號之前建立過寵物，就直接載入並跳過設定頁面；否則才顯示設定頁面
+                if (usersDb[email]) {
+                    setPetProfile(usersDb[email]); 
+                } else {
+                    setPetProfile(null);
+                }
+            };
+
+            if (!currentUser) return <LoginScreen onLogin={handleLogin} />;
             if (!petProfile) return <ProfileSetup currentUser={currentUser} onComplete={setPetProfile} />;
 
             return (
