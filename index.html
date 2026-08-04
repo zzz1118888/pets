@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寵物每一天 - 概念原型</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        .typing-dot { animation: typing 1.4s infinite ease-in-out; fill: currentColor; }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen flex justify-center items-center">
+    <div id="root" class="w-full max-w-md bg-white h-full sm:h-[90vh] sm:rounded-[2rem] sm:shadow-2xl overflow-hidden flex flex-col relative sm:border-[8px] sm:border-gray-900"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 模擬後端資料庫初始化 ---
+        const DB_KEY_USERS = 'petApp_users'; 
+        const DB_KEY_POSTS = 'petApp_posts'; 
+        const DB_KEY_AUTH = 'petApp_auth';   
+        const DB_KEY_CURRENT_USER = 'petApp_currentUser'; 
+
+        // 加入 timestamp 用於動態時間計算
+        const defaultPosts = [
+            { id: 2, author: 'LeoMom', petName: 'Leo', time: '1 小時前', timestamp: Date.now() - 3600000, avatar: '🐕', content: '今天天氣超好，帶 Leo 去了寵物公園，結果牠交到了新朋友！跑了一下午回家直接秒睡 🤣', image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80' },
+            { id: 1, author: 'CatLover99', petName: '咪咪', time: '3 小時前', timestamp: Date.now() - 10800000, avatar: '🐈', content: '買了超貴的貓抓板給牠，結果牠只對旁邊的紙箱有興趣... 奴才心已死 💸', image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=500&q=80' }
+        ];
+
+        // --- 元件：信箱密碼註冊/登入系統 ---
+        const LoginScreen = ({ onLogin }) => {
+            const [isLoginMode, setIsLoginMode] = useState(true);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleResetSystem = () => {
+                if(window.confirm('展示專用：確定要清除所有本地資料庫設定嗎？')) {
+                    localStorage.clear();
+                    window.location.reload();
+                }
+            };
+
+            const handleAuth = () => {
+                if (!email.trim() || !password.trim()) return alert('請完整輸入信箱與密碼！');
+                if (!email.includes('@')) return alert('請輸入有效的信箱格式！');
+
+                const authDb = JSON.parse(localStorage.getItem(DB_KEY_AUTH)) || {};
+
+                if (isLoginMode) {
+                    if (!authDb[email]) return alert('找不到此信箱，請先註冊！');
+                    if (authDb[email] !== password) return alert('密碼錯誤！');
+                    
+                    localStorage.setItem(DB_KEY_CURRENT_USER, email);
+                    onLogin(email);
+                } else {
+                    if (authDb[email]) return alert('此信箱已經被註冊過了！請直接登入。');
+                    
+                    authDb[email] = password;
+                    localStorage.setItem(DB_KEY_AUTH, JSON.stringify(authDb));
+                    alert('註冊成功！即將為您登入。');
+                    
+                    localStorage.setItem(DB_KEY_CURRENT_USER, email);
+                    onLogin(email);
+                }
+            };
+
+            return (
+                <div class="h-full flex flex-col items-center justify-center bg-blue-50 p-6 relative">
+                    <button onClick={handleResetSystem} class="absolute top-6 left-6 text-xs text-gray-400 bg-white px-2 py-1 rounded shadow-sm hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-trash-can mr-1"></i>重置系統
+                    </button>
+
+                    <div class="absolute top-16 text-center w-full">
+                        <div class="text-6xl mb-2 text-blue-500"><i class="fa-solid fa-paw"></i></div>
+                        <h1 class="text-3xl font-extrabold text-blue-900 tracking-wider">寵物每一天</h1>
+                        <p class="text-sm text-blue-600 mt-2 font-bold">你的專屬毛孩智能管家</p>
+                    </div>
+                    
+                    <div class="bg-white w-full p-6 rounded-2xl shadow-xl mt-24 border border-blue-100 relative z-10">
+                        <div class="flex justify-center gap-4 mb-6 border-b pb-2">
+                            <button onClick={() => setIsLoginMode(true)} class={`font-bold pb-2 px-2 transition-colors ${isLoginMode ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'}`}>登入</button>
+                            <button onClick={() => setIsLoginMode(false)} class={`font-bold pb-2 px-2 transition-colors ${!isLoginMode ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'}`}>註冊</button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">電子信箱</label>
+                                <input type="email" class="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="例如: test@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">密碼</label>
+                                <input type="password" class="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder={isLoginMode ? "請輸入密碼" : "設定新密碼"} value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAuth()} />
+                            </div>
+                            <button onClick={handleAuth} class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-colors mt-2">
+                                {isLoginMode ? '登入系統' : '完成註冊並登入'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 元件：寵物資料建立 (Onboarding) ---
+        const ProfileSetup = ({ currentUser, onComplete }) => {
+            const dogBreeds = ['米克斯 (混血/土狗)', '台灣犬', '柴犬', '貴賓犬', '法式鬥牛犬', '柯基', '黃金獵犬', '臘腸狗', '博美犬', '吉娃娃', '瑪爾濟斯', '邊境牧羊犬', '哈士奇', '拉布拉多', '薩摩耶', '雪納瑞'];
+            const catBreeds = ['米克斯 (一般混血)', '三花貓', '橘貓', '賓士貓 (黑白貓)', '玳瑁貓', '黑貓', '白貓', '虎斑貓', '英國短毛貓', '美國短毛貓', '布偶貓', '曼赤肯 (短腿貓)', '緬因貓', '波斯貓', '俄羅斯藍貓', '暹羅貓'];
+
+            const [formData, setFormData] = useState({ name: '', species: '狗', breed: '米克斯 (混血/土狗)', gender: '男', isNeutered: '未絕育' });
+            const displayName = currentUser.split('@')[0];
+
+            const handleSubmit = () => {
+                if (!formData.name.trim()) return alert('請輸入寵物名字！');
+                const usersDb = JSON.parse(localStorage.getItem(DB_KEY_USERS)) || {};
+                usersDb[currentUser] = formData;
+                localStorage.setItem(DB_KEY_USERS, JSON.stringify(usersDb));
+                onComplete(formData);
+            };
+
+            return (
+                <div class="p-6 h-full flex flex-col justify-center bg-blue-50">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-blue-100">
+                        <div class="text-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Hi, {displayName}!</h2>
+                            <p class="text-sm text-gray-500 mt-1">請先建立你的寵物檔案</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">寵物名字</label>
+                                <input type="text" class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="例如：毛毛" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">物種</label>
+                                    <select class="w-full border p-2 rounded-lg bg-white" value={formData.species} onChange={e => setFormData({...formData, species: e.target.value, breed: e.target.value === '狗' ? dogBreeds[0] : catBreeds[0]})}>
+                                        <option value="狗">狗</option>
+                                        <option value="貓">貓</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">品種 / 花色</label>
+                                    <select class="w-full border p-2 rounded-lg bg-white" value={formData.breed} onChange={e => setFormData({...formData, breed: e.target.value})}>
+                                        {(formData.species === '狗' ? dogBreeds : catBreeds).map(b => <option key={b} value={b}>{b}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">性別</label>
+                                    <select class="w-full border p-2 rounded-lg bg-white" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}><option value="男">男生</option><option value="女">女生</option></select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">絕育狀態</label>
+                                    <select class="w-full border p-2 rounded-lg bg-white" value={formData.isNeutered} onChange={e => setFormData({...formData, isNeutered: e.target.value})}><option value="未絕育">未絕育</option><option value="已絕育">已絕育</option></select>
+                                </div>
+                            </div>
+                            <button onClick={handleSubmit} class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 transition-colors">完成設定</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 元件：首頁與社群牆 ---
+        const HomeTab = ({ pet, posts, setPosts, currentUser }) => {
+            const [inputText, setInputText] = useState('');
+            const [imagePreview, setImagePreview] = useState(null);
+            const [now, setNow] = useState(Date.now()); // 用於動態時間更新
+            const fileInputRef = useRef(null);
+            const displayName = currentUser.split('@')[0];
+
+            // 啟動計時器：每30秒更新一次當下時間，以便重新渲染時間字串
+            useEffect(() => {
+                const timer = setInterval(() => setNow(Date.now()), 30000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const handleImageChange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => setImagePreview(reader.result);
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handlePublish = () => {
+                if (!inputText.trim() && !imagePreview) return;
+                // 新增 timestamp，並保留 time 以兼容舊資料
+                const newPost = { 
+                    id: Date.now(), 
+                    author: displayName, 
+                    petName: pet.name, 
+                    time: '剛剛', 
+                    timestamp: Date.now(),
+                    avatar: pet.species === '狗' ? '🐶' : '🐱', 
+                    content: inputText, 
+                    image: imagePreview 
+                };
+                const updatedPosts = [newPost, ...posts];
+                setPosts(updatedPosts);
+                localStorage.setItem(DB_KEY_POSTS, JSON.stringify(updatedPosts));
+                setInputText('');
+                setImagePreview(null);
+            };
+
+            // 將 timestamp 轉換成相對時間字串
+            const getRelativeTime = (timestamp, staticTime) => {
+                if (!timestamp) return staticTime; // 舊資料備案
+                const diffSeconds = Math.floor((now - timestamp) / 1000);
+                if (diffSeconds < 60) return '剛剛';
+                if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)} 分鐘前`;
+                if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} 小時前`;
+                return `${Math.floor(diffSeconds / 86400)} 天前`;
+            };
+
+            return (
+                <div class="p-4 overflow-y-auto h-full pb-20">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">寵物動態牆</h2>
+                    <div class="bg-blue-50 p-4 rounded-xl mb-6 shadow-sm border border-blue-100">
+                        <p class="text-sm text-blue-800 font-bold mb-2">更新「{pet.name}」的今日狀態</p>
+                        <textarea class="w-full p-3 border border-gray-200 rounded-lg text-sm mb-2 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all" placeholder={`今天帶${pet.name}去哪裡玩了...`} value={inputText} onChange={(e) => setInputText(e.target.value)}></textarea>
+                        {imagePreview && (
+                            <div class="relative mb-3">
+                                <img src={imagePreview} class="w-full h-32 object-cover rounded-lg border" />
+                                <button onClick={() => setImagePreview(null)} class="absolute top-2 right-2 bg-gray-800 bg-opacity-70 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs shadow-md backdrop-blur-sm hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        )}
+                        <div class="flex justify-between items-center">
+                            <input type="file" accept="image/*" class="hidden" ref={fileInputRef} onChange={handleImageChange} />
+                            <button onClick={() => fileInputRef.current.click()} class="text-blue-500 bg-white px-3 py-1.5 border border-blue-200 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors">
+                                <i class="fa-solid fa-camera"></i> 添加照片
+                            </button>
+                            <button onClick={handlePublish} class="bg-blue-600 text-white px-6 py-1.5 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 transition-colors">發布</button>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        {posts.map(post => (
+                            <div key={post.id} class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl mr-3 shadow-inner">{post.avatar}</div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-800">{post.author} <span class="text-xs text-gray-400 font-normal ml-1">· {post.petName}的主人</span></p>
+                                        <p class="text-[10px] text-gray-400">{getRelativeTime(post.timestamp, post.time)}</p>
+                                    </div>
+                                </div>
+                                {post.image && <img src={post.image} class="w-full h-48 object-cover rounded-xl mb-3 shadow-sm border border-gray-100" />}
+                                <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 元件：私人化寵物養成指南 ---
+        const GuideTab = ({ pet, posts, currentUser }) => {
+            const displayName = currentUser.split('@')[0];
+            const myPostCount = posts.filter(p => p.author === displayName).length;
+
+            const getBreedRecommendation = () => {
+                if (pet.breed === '法式鬥牛犬' || pet.breed === '巴哥犬' || pet.breed === '英國鬥牛犬') return { name: '透氣防衝撞胸背帶', desc: '短吻品種呼吸道較短，使用胸背帶可大幅降低頸部與氣管壓力。', tag: '短吻必備', icon: 'fa-vest', color: 'text-purple-500' };
+                if (pet.breed === '柯基' || pet.breed === '臘腸狗') return { name: '寵物護脊斜坡階梯', desc: '短腿犬容易有脊椎負擔，應絕對避免讓牠們頻繁跳躍沙發。', tag: '護脊推薦', icon: 'fa-stairs', color: 'text-orange-500' };
+                if (pet.breed === '哈士奇' || pet.breed === '邊境牧羊犬' || pet.breed === '柴犬') return { name: '高難度益智漏食玩具', desc: '高智商且精力旺盛的犬種，需要益智玩具消耗腦力。', tag: '精力消耗', icon: 'fa-puzzle-piece', color: 'text-red-500' };
+                if (pet.breed === '橘貓') return { name: '低碳水體重控制糧', desc: '「十隻橘貓九隻胖」，為了保護關節與心血管健康，請嚴格控管熱量！', tag: '易胖體質對策', icon: 'fa-weight-scale', color: 'text-orange-500' };
+                if (pet.breed === '英國短毛貓' || pet.breed === '美國短毛貓') return { name: '低敏排毛粉', desc: '毛髮濃密，換季時需加強排毛，避免引發毛球症影響食慾。', tag: '腸胃健康', icon: 'fa-seedling', color: 'text-green-500' };
+                
+                return pet.species === '狗' 
+                    ? { name: '全效型綜合維他命', desc: '補充狗狗日常所需營養，增強免疫力。', tag: '日常保健', icon: 'fa-pills', color: 'text-blue-500' }
+                    : { name: '嚴選凍乾主食餐', desc: '符合貓咪天性，高蛋白質攝取，維持肌肉量。', tag: '優質蛋白', icon: 'fa-fish', color: 'text-blue-500' };
+            };
+
+            const specificRec = getBreedRecommendation();
+
+            return (
+                <div class="p-4 overflow-y-auto h-full pb-20">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">專屬養成指南</h2>
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-2xl shadow-sm mb-6">
+                        <h3 class="font-bold text-blue-800 flex items-center gap-2"><i class="fa-solid fa-paw"></i> 關於 {pet.name} ({pet.breed})</h3>
+                        <p class="text-sm text-gray-700 mt-2 leading-relaxed">
+                            系統偵測到您已記錄了 <strong>{myPostCount}</strong> 篇動態。針對 {pet.breed} 的體質與特徵，我們準備了專屬建議。
+                        </p>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-3">🛍️ 針對「{pet.breed}」的推薦</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start bg-white p-4 rounded-xl shadow-sm border border-orange-100 hover:shadow-md transition-shadow">
+                            <div class={`w-14 h-14 bg-gray-50 rounded-xl mr-3 flex items-center justify-center text-2xl shadow-inner ${specificRec.color}`}><i class={`fa-solid ${specificRec.icon}`}></i></div>
+                            <div>
+                                <p class="font-bold text-sm text-gray-800">{specificRec.name}</p>
+                                <p class="text-xs text-gray-500 mt-1 leading-relaxed">{specificRec.desc}</p>
+                                <span class="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-100 mt-2 inline-block font-bold">{specificRec.tag}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 元件：智能提醒 ---
+        const ReminderTab = ({ pet, posts, currentUser }) => {
+            const displayName = currentUser.split('@')[0];
+            const hasPostedToday = posts.some(p => p.author === displayName);
+
+            return (
+                <div class="p-4 overflow-y-auto h-full pb-20">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">專屬提醒</h2>
+                    <div class="space-y-4">
+                        {pet.gender === '女' && pet.isNeutered === '未絕育' && (
+                            <div class="bg-red-50 border-l-4 border-red-500 p-5 rounded-r-2xl shadow-sm">
+                                <p class="text-sm font-bold text-red-700 flex items-center"><i class="fa-solid fa-triangle-exclamation mr-2"></i> 生理期預警</p>
+                                <p class="text-xs text-red-600 mt-2 leading-relaxed">根據紀錄，{pet.name}近期可能進入發情期，請特別留意情緒變化。</p>
+                            </div>
+                        )}
+                        {!hasPostedToday ? (
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-r-2xl shadow-sm">
+                                <p class="text-sm font-bold text-yellow-700 flex items-center"><i class="fa-regular fa-calendar-minus mr-2"></i> 今日活動任務未完成</p>
+                                <p class="text-xs text-yellow-600 mt-2 leading-relaxed">今天還沒有幫 {pet.name} 紀錄活動喔！請到紀錄頁面分享一下近況吧。</p>
+                            </div>
+                        ) : (
+                            <div class="bg-green-50 border-l-4 border-green-500 p-5 rounded-r-2xl shadow-sm">
+                                <p class="text-sm font-bold text-green-700 flex items-center"><i class="fa-regular fa-calendar-check mr-2"></i> 今日任務已達成！</p>
+                                <p class="text-xs text-green-600 mt-2 leading-relaxed">太棒了！今天已經記錄過 {pet.name} 的日常了，繼續保持！</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 元件：AI 急診初步判斷 ---
+        const AIVetTab = ({ pet }) => {
+            const [messages, setMessages] = useState([{ sender: 'bot', text: `你好！我是急診助手。${pet.name} 今天怎麼了？請描述症狀。` }]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const chatEndRef = useRef(null);
+            const inputRef = useRef(null);
+
+            const mockLLMFetch = async (userText, petName) => {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        let botReply = '';
+                        if (userText.includes('吐') || userText.includes('血') || userText.includes('抽搐') || userText.includes('昏迷') || userText.includes('不吃')) {
+                            botReply = `⚠️ 護欄警示：偵測到危險症狀！\n\n【立即送醫】\n請停止餵食，並立即將 ${petName} 送往附近 24H 獸醫院！`;
+                        } else if (userText.includes('健康') || userText.includes('沒事') || userText.includes('很好') || userText.includes('活潑')) {
+                            botReply = `太棒了！聽到 ${petName} 很健康真是最好的消息 🎉\n如果有任何日常保健的問題，隨時可以問我喔！`;
+                        } else if (userText.includes('你好') || userText.includes('哈囉')) {
+                            botReply = `你好呀！有什麼我可以幫忙的嗎？可以跟我說說 ${petName} 今天的狀況。`;
+                        } else {
+                            botReply = `【初步建議：先觀察】\n這可能是輕微狀況。請先密切觀察 ${petName} 12 小時，若出現食慾不振或症狀持續，請務必就醫。`;
+                        }
+                        resolve(botReply);
+                    }, 1200); 
+                });
+            };
+
+            const handleSend = async () => {
+                if (!input.trim() || isTyping) return;
+                
+                const userText = input.trim();
+                const newMsgs = [...messages, { sender: 'user', text: userText }];
+                setMessages(newMsgs);
+                setInput('');
+                setIsTyping(true);
+
+                const reply = await mockLLMFetch(userText, pet.name);
+                
+                setIsTyping(false);
+                setMessages([...newMsgs, { sender: 'bot', text: reply }]);
+                inputRef.current?.focus();
+            };
+
+            useEffect(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages, isTyping]);
+
+            // 修改此區塊：使用 flexbox 原生流體佈局，不使用 absolute，解決遮擋問題
+            return (
+                <div class="flex flex-col h-full bg-gray-50 pb-[70px]">
+                    {/* 頂部標題 */}
+                    <div class="bg-blue-600 text-white p-4 shadow-md z-10 shrink-0">
+                        <h2 class="text-lg font-bold flex items-center"><i class="fa-solid fa-stethoscope mr-2"></i> AI 急診初步判斷</h2>
+                    </div>
+                    
+                    {/* 聊天訊息區塊 (自動滾動) */}
+                    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                        {messages.map((msg, idx) => (
+                            <div key={idx} class={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div class={`max-w-[85%] p-3.5 rounded-2xl text-sm whitespace-pre-wrap shadow-sm leading-relaxed ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'}`}>
+                                    {msg.text}
+                                </div>
+                            </div>
+                        ))}
+                        {isTyping && (
+                            <div class="flex justify-start">
+                                <div class="bg-white border border-gray-100 p-4 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-1.5">
+                                    <svg height="8" width="8" class="typing-dot text-gray-400"><circle cx="4" cy="4" r="4" /></svg>
+                                    <svg height="8" width="8" class="typing-dot text-gray-400"><circle cx="4" cy="4" r="4" /></svg>
+                                    <svg height="8" width="8" class="typing-dot text-gray-400"><circle cx="4" cy="4" r="4" /></svg>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={chatEndRef} class="h-2"></div>
+                    </div>
+
+                    {/* 輸入框區塊 (自動吸附底部) */}
+                    <div class="p-4 bg-white border-t flex gap-2 shrink-0 z-10">
+                        <input 
+                            ref={inputRef}
+                            type="text" 
+                            class="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner bg-gray-50" 
+                            placeholder="描述寵物症狀..." 
+                            value={input} 
+                            onChange={(e) => setInput(e.target.value)} 
+                            onKeyPress={(e) => e.key === 'Enter' && handleSend()} 
+                            disabled={isTyping}
+                        />
+                        <button 
+                            onClick={handleSend} 
+                            disabled={isTyping || !input.trim()}
+                            class={`px-5 py-2.5 rounded-full text-sm font-bold shadow-md transition-colors ${!input.trim() || isTyping ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                        >
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 主應用程式 ---
+        const App = () => {
+            const [currentUser, setCurrentUser] = useState(null);
+            const [petProfile, setPetProfile] = useState(null);
+            const [activeTab, setActiveTab] = useState('home');
+            const [posts, setPosts] = useState([]);
+            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+            useEffect(() => {
+                const savedPosts = JSON.parse(localStorage.getItem(DB_KEY_POSTS));
+                if (savedPosts && savedPosts.length > 0) {
+                    setPosts(savedPosts);
+                } else {
+                    setPosts(defaultPosts);
+                    localStorage.setItem(DB_KEY_POSTS, JSON.stringify(defaultPosts));
+                }
+
+                const loggedInUser = localStorage.getItem(DB_KEY_CURRENT_USER);
+                if (loggedInUser) {
+                    setCurrentUser(loggedInUser);
+                    const usersDb = JSON.parse(localStorage.getItem(DB_KEY_USERS)) || {};
+                    if (usersDb[loggedInUser]) setPetProfile(usersDb[loggedInUser]);
+                }
+            }, []);
+
+            const handleLogout = () => {
+                localStorage.removeItem(DB_KEY_CURRENT_USER);
+                setCurrentUser(null);
+                setPetProfile(null);
+                setActiveTab('home');
+                setIsSidebarOpen(false); 
+            };
+
+            if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
+            if (!petProfile) return <ProfileSetup currentUser={currentUser} onComplete={setPetProfile} />;
+
+            return (
+                <div class="h-full relative flex flex-col bg-gray-50 overflow-hidden">
+                    {/* --- 頂部導航列 (改為漢堡選單) --- */}
+                    <div class="h-14 bg-white flex items-center justify-between px-5 font-bold text-gray-800 border-b shadow-[0_2px_10px_rgba(0,0,0,0.03)] relative z-10">
+                        <div class="flex items-center gap-2 text-blue-600 text-lg">
+                            <i class="fa-solid fa-paw"></i> <span>寵物每一天</span>
+                        </div>
+                        <button onClick={() => setIsSidebarOpen(true)} class="text-gray-500 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                            <i class="fa-solid fa-bars text-xl"></i>
+                        </button>
+                    </div>
+
+                    {/* --- 主要內容區塊 --- */}
+                    <div class="flex-1 overflow-hidden relative">
+                        {activeTab === 'home' && <HomeTab pet={petProfile} posts={posts} setPosts={setPosts} currentUser={currentUser} />}
+                        {activeTab === 'guide' && <GuideTab pet={petProfile} posts={posts} currentUser={currentUser} />}
+                        {activeTab === 'reminders' && <ReminderTab pet={petProfile} posts={posts} currentUser={currentUser} />}
+                        {activeTab === 'aivet' && <AIVetTab pet={petProfile} />}
+                    </div>
+                    
+                    {/* --- 底部導航列 --- */}
+                    <div class="absolute bottom-0 w-full h-[70px] pb-safe bg-white border-t flex justify-around items-center text-[10px] text-gray-400 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] z-20">
+                        <button onClick={() => setActiveTab('home')} class={`flex flex-col items-center w-full pt-2 h-full transition-colors ${activeTab === 'home' ? 'text-blue-600 font-bold' : 'hover:text-gray-500'}`}><i class="fa-solid fa-house text-xl mb-1"></i>紀錄</button>
+                        <button onClick={() => setActiveTab('guide')} class={`flex flex-col items-center w-full pt-2 h-full transition-colors ${activeTab === 'guide' ? 'text-blue-600 font-bold' : 'hover:text-gray-500'}`}><i class="fa-solid fa-book-open text-xl mb-1"></i>指南</button>
+                        <button onClick={() => setActiveTab('reminders')} class={`flex flex-col items-center w-full pt-2 h-full transition-colors ${activeTab === 'reminders' ? 'text-blue-600 font-bold' : 'hover:text-gray-500'}`}><i class="fa-solid fa-bell text-xl mb-1"></i>提醒</button>
+                        <button onClick={() => setActiveTab('aivet')} class={`flex flex-col items-center w-full pt-2 h-full transition-colors ${activeTab === 'aivet' ? 'text-blue-600 font-bold' : 'hover:text-gray-500'}`}><i class="fa-solid fa-stethoscope text-xl mb-1"></i>急診</button>
+                    </div>
+
+                    {/* --- 側邊欄 (Sidebar) 實作 --- */}
+                    {isSidebarOpen && (
+                        <div class="absolute inset-0 bg-black bg-opacity-40 z-40 transition-opacity" onClick={() => setIsSidebarOpen(false)}></div>
+                    )}
+                    
+                    <div class={`absolute top-0 right-0 h-full w-64 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <div class="p-5 border-b flex justify-between items-center bg-blue-50">
+                            <span class="font-bold text-blue-800">個人與設定</span>
+                            <button onClick={() => setIsSidebarOpen(false)} class="text-gray-400 hover:text-red-500 transition-colors">
+                                <i class="fa-solid fa-xmark text-2xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="p-5 flex-1 overflow-y-auto">
+                            <div class="mb-6">
+                                <p class="text-xs text-gray-400 mb-1">目前登入帳號</p>
+                                <p class="font-bold text-gray-800 truncate">{currentUser}</p>
+                            </div>
+                            
+                            {petProfile && (
+                                <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                    <p class="text-xs text-gray-400 mb-2">毛孩資料</p>
+                                    <p class="font-bold text-gray-800 text-lg mb-1">
+                                        {petProfile.name} 
+                                        <span class="text-sm font-normal text-gray-500 ml-1">{petProfile.gender === '男' ? '♂' : '♀'}</span>
+                                    </p>
+                                    <p class="text-xs text-gray-500 font-medium">{petProfile.breed}</p>
+                                    <span class="inline-block mt-3 text-[10px] bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md font-bold">{petProfile.isNeutered}</span>
+                                </div>
+                            )}
+                            
+                            <ul class="space-y-1">
+                                <li><button class="w-full text-left p-3 hover:bg-blue-50 rounded-xl text-gray-700 font-bold transition-colors flex items-center"><i class="fa-solid fa-gear w-6 text-gray-400"></i> 系統設定</button></li>
+                                <li><button class="w-full text-left p-3 hover:bg-blue-50 rounded-xl text-gray-700 font-bold transition-colors flex items-center"><i class="fa-regular fa-circle-question w-6 text-gray-400"></i> 常見問題</button></li>
+                                <li><button class="w-full text-left p-3 hover:bg-blue-50 rounded-xl text-gray-700 font-bold transition-colors flex items-center"><i class="fa-solid fa-shield-cat w-6 text-gray-400"></i> 隱私權政策</button></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-5 border-t bg-gray-50">
+                            <button onClick={handleLogout} class="w-full py-3.5 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-colors flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-right-from-bracket mr-2"></i> 登出帳號
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
