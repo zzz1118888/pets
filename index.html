@@ -30,10 +30,12 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const DB_KEY_USERS = 'petApp_v4_users'; 
-        const DB_KEY_POSTS = 'petApp_v4_posts'; 
-        const DB_KEY_AUTH = 'petApp_v4_auth';   
-        const DB_KEY_CURRENT_USER = 'petApp_v4_currentUser'; 
+        const DB_KEY_USERS = 'petApp_v5_users'; 
+        const DB_KEY_POSTS = 'petApp_v5_posts'; 
+        const DB_KEY_AUTH = 'petApp_v5_auth';   
+        const DB_KEY_CURRENT_USER = 'petApp_v5_currentUser'; 
+        // 🌟 新增：專門用來存 API Key 的 LocalStorage Key
+        const DB_KEY_API_TOKEN = 'petApp_v5_geminiToken';
 
         const defaultPosts = [
             { id: 2, author: 'LeoMom', avatar: '👩', petName: 'Leo', time: '1 小時前', timestamp: Date.now() - 3600000, content: '今天天氣超好，帶 Leo 去了寵物公園，結果牠交到了新朋友！跑了一下午回家直接秒睡 🤣', image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80', likes: 12, likedByMe: false, comments: [{id: 1, author: '王大明', text: '太可愛了吧！'}] },
@@ -163,14 +165,19 @@
             );
         };
 
-        // --- 設定 Modal ---
+        // --- 設定 Modal (🌟 加入 API Key 設定欄位) ---
         const SettingsModal = ({ userData, onClose, onUpdateUser }) => {
             const [name, setName] = useState(userData.name);
             const [avatar, setAvatar] = useState(userData.avatar);
             const [editingPet, setEditingPet] = useState(null);
+            const [apiKey, setApiKey] = useState(localStorage.getItem(DB_KEY_API_TOKEN) || ''); // 讀取/設定 API Key
             const avatarInputRef = useRef(null);
 
-            const handleSave = () => { onUpdateUser({ ...userData, name, avatar }); onClose(); };
+            const handleSave = () => { 
+                onUpdateUser({ ...userData, name, avatar }); 
+                localStorage.setItem(DB_KEY_API_TOKEN, apiKey); // 儲存 API Key
+                onClose(); 
+            };
 
             if (editingPet) return <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"><PetForm initialData={editingPet} onSave={(updatedPet) => { onUpdateUser({ ...userData, pets: userData.pets.map(p => p.id === updatedPet.id ? updatedPet : p) }); setEditingPet(null); }} onCancel={() => setEditingPet(null)} /></div>;
 
@@ -178,7 +185,7 @@
                 <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div class="bg-white w-full max-w-md rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
                         <div class="p-6 flex justify-between items-center bg-gray-50/50">
-                            <h3 class="font-bold text-xl text-gray-800">個人與寵物設定</h3>
+                            <h3 class="font-bold text-xl text-gray-800">個人與系統設定</h3>
                             <button onClick={onClose} class="text-gray-400 hover:text-red-500 bg-white w-8 h-8 rounded-full shadow-sm flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <div class="p-6 overflow-y-auto flex-1">
@@ -197,6 +204,17 @@
                                 </div>
                             </div>
                             
+                            {/* 🌟 新增的 API Key 設定區塊 */}
+                            <h4 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider flex justify-between">
+                                <span>AI 診斷引擎設定</span>
+                                <a href="https://aistudio.google.com/" target="_blank" class="text-indigo-500 hover:underline">取得 Key</a>
+                            </h4>
+                            <div class="mb-8 bg-indigo-50 p-4 rounded-2xl">
+                                <label class="block text-xs font-bold text-indigo-700 mb-2">Gemini API Key (本機安全儲存)</label>
+                                <input type="password" class="w-full border-none bg-white shadow-sm p-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 text-sm" placeholder="AIzaSy..." value={apiKey} onChange={e => setApiKey(e.target.value)} />
+                                <p class="text-[10px] text-indigo-500 mt-2 leading-relaxed">此金鑰僅會儲存在您的瀏覽器本地端，不會上傳至任何伺服器。若要使用 AI 急診室的影像分析功能，請填寫有效金鑰。</p>
+                            </div>
+
                             <h4 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">管理寵物</h4>
                             <div class="space-y-3">
                                 {userData.pets.map(p => (
@@ -214,7 +232,7 @@
                             </div>
                         </div>
                         <div class="p-6 border-t border-gray-50 bg-white">
-                            <button onClick={handleSave} class="w-full bg-indigo-900 text-white font-bold py-4 rounded-2xl hover:bg-indigo-800 shadow-lg">儲存所有設定</button>
+                            <button onClick={handleSave} class="w-full bg-indigo-900 text-white font-bold py-4 rounded-2xl hover:bg-indigo-800 shadow-lg transition-transform hover:-translate-y-0.5">儲存所有設定</button>
                         </div>
                     </div>
                 </div>
@@ -466,27 +484,25 @@
             );
         };
 
-        // --- AI 急診 (修復：支援圖片與文字組合發送，可調用 Gemini API) ---
+        // --- AI 急診 (🌟 實裝 Gemini API 智慧攔截與讀取機制) ---
         const AIVetTab = ({ userData }) => {
-            const [messages, setMessages] = useState([{ sender: 'bot', text: `你好！我是急診助手。請問是哪一隻毛孩怎麼了？請描述症狀，必要時可上傳照片。` }]);
+            const [messages, setMessages] = useState([{ sender: 'bot', text: `你好！我是急診助手。請問是哪一隻毛孩怎麼了？請描述症狀，必要時可上傳照片讓我幫您分析。` }]);
             const [input, setInput] = useState('');
-            const [imageAttachment, setImageAttachment] = useState(null); // 暫存待發送的圖片
+            const [imageAttachment, setImageAttachment] = useState(null); 
             const [isTyping, setIsTyping] = useState(false);
             const chatEndRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            // 🌟 呼叫 Google Gemini 多模態 API 函數
+            // 🌟 呼叫 Google Gemini API
             const callGeminiAPI = async (userText, imageBase64) => {
-                // ⚠️ 請在此填入您的 Google Gemini API Key
-                const GEMINI_API_KEY = "AQ.Ab8RN6LXEG7ZRGPHDBqxnWVcsuHhWCaSjMs1V4WSv05Hh8gd5Q";
+                // 從 LocalStorage 讀取使用者輸入的 API Key
+                const GEMINI_API_KEY = localStorage.getItem(DB_KEY_API_TOKEN);
 
-                if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
-                    // 若未設定 Key 則提供說明與預設備用回覆
-                    return `【提示：尚未配置 Gemini API Key】\n要開啟真正的 Gemini AI 圖片診斷能力，請在代碼中填入 Gemini API Key。\n\n【備用建議】：已收到描述/照片，若寵物出現食慾不振、抽搐或吐血，請立即送前往 24 小時獸醫院！`;
+                if (!GEMINI_API_KEY) {
+                    return `⚠️ 【系統提示】：您尚未設定 API Key！\n\n因為專案開源在 GitHub，直接放入金鑰會有被盜用的風險。請點擊左側「管理設定」，在「AI 診斷引擎設定」中輸入您的 Gemini API Key 來解鎖真正的 AI 功能！`;
                 }
 
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                
                 const petsInfo = userData?.pets?.map(p => `- ${p.name} (${p.species}, ${p.breed}, ${p.gender}, ${p.isNeutered})`).join('\n') || '無詳細資料';
 
                 const promptText = `你是一位專業、親切且有同理心的獸醫急診助手。
@@ -497,8 +513,8 @@ ${petsInfo}
 
 請遵循以下要求：
 1. 語氣專業、貼心且簡明扼要。
-2. ⚠️ 【安全護欄】：若發現嚴重症狀（如出血、劇烈嘔吐、昏迷、呼吸困難等），請在最開頭用【⚠️ 立即送醫提示】警示主人。
-3. 若有照片，請結合照片細節（如皮膚病變、眼疾、傷口等）給出建議。`;
+2. ⚠️ 【安全護欄】：若從圖片或文字中發現嚴重症狀（如出血、劇烈嘔吐、昏迷、呼吸困難等），請在最開頭用【⚠️ 立即送醫提示】警示主人。
+3. 若有照片，請結合照片細節給出初步觀察建議。`;
 
                 const parts = [];
                 if (imageBase64) {
@@ -515,33 +531,34 @@ ${petsInfo}
                         body: JSON.stringify({ contents: [{ parts }] })
                     });
                     const data = await response.json();
+                    
+                    if (data.error) {
+                         return `❌ API 發生錯誤：${data.error.message}。\n請檢查您的 API Key 是否正確。`;
+                    }
                     if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
                         return data.candidates[0].content.parts[0].text;
                     }
-                    return "AI 響應異常，請稍後再試。若狀況緊急請直接就醫！";
+                    return "AI 響應異常，請稍後再試。";
                 } catch (err) {
                     console.error("Gemini API Error:", err);
-                    return "連接 Gemini API 失敗，請檢查網路或 API Key 配置。";
+                    return "連接 Gemini API 失敗，請檢查網路連線。";
                 }
             };
 
-            // 修正後的發送邏輯：可以同時包含 input 文字與 imageAttachment 圖片
             const handleSend = async () => {
                 if (!input.trim() && !imageAttachment) return;
                 
                 const userText = input.trim();
                 const currentImg = imageAttachment;
 
-                // 清空輸入區
                 setInput('');
                 setImageAttachment(null);
 
-                // 將圖片與文字組合在同一條 User 訊息發出
                 const newMsgs = [...messages, { sender: 'user', text: userText, image: currentImg }];
                 setMessages(newMsgs);
                 setIsTyping(true);
 
-                // 呼叫 Gemini AI
+                // 呼叫真實的 Gemini API
                 const botReply = await callGeminiAPI(userText, currentImg);
                 
                 setIsTyping(false);
@@ -554,7 +571,7 @@ ${petsInfo}
                 <div class="flex flex-col h-full bg-white pb-[70px] md:pb-0 relative">
                     <div class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-5 shadow-md z-10 shrink-0">
                         <h2 class="text-lg font-bold flex items-center"><i class="fa-solid fa-stethoscope mr-2 text-2xl"></i> AI 急診室</h2>
-                        <p class="text-xs text-indigo-100 mt-1">目前已載入您所有寵物的基本健康檔案</p>
+                        <p class="text-xs text-indigo-100 mt-1">請在設定中輸入 Gemini API Key 以啟用完整影像識別功能</p>
                     </div>
                     
                     <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
@@ -572,9 +589,7 @@ ${petsInfo}
                         <div ref={chatEndRef} class="h-2"></div>
                     </div>
 
-                    {/* 輸入與圖片預覽區 */}
                     <div class="p-4 bg-white border-t border-gray-100 flex flex-col gap-2 shrink-0 z-10 absolute md:relative bottom-0 w-full">
-                        {/* 待發送圖片預覽條 */}
                         {imageAttachment && (
                             <div class="relative inline-block w-24 h-24 mb-1">
                                 <img src={imageAttachment} class="w-24 h-24 object-cover rounded-xl border-2 border-indigo-200 shadow-sm" />
@@ -586,7 +601,7 @@ ${petsInfo}
                             <input type="file" accept="image/*" class="hidden" ref={fileInputRef} onChange={e => {
                                 if(e.target.files[0]) {
                                     const reader = new FileReader();
-                                    reader.onloadend = () => setImageAttachment(reader.result); // 暫存圖片，不立即發送
+                                    reader.onloadend = () => setImageAttachment(reader.result);
                                     reader.readAsDataURL(e.target.files[0]);
                                 }
                             }} />
