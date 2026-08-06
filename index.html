@@ -3,39 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>寵物每一天 Pro Max</title>
+    <title>寵物每一天 </title>
+    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8fafc; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        @media (max-width: 768px) { ::-webkit-scrollbar { display: none; } }
-        .typing-dot { animation: typing 1.4s infinite ease-in-out; fill: currentColor; }
+        /* 🌟 嚴格鎖死外層，防止瀏覽器霸道滾動 */
+        html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; position: fixed; touch-action: none; background-color: #f0f4f8; color: #334155; font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; }
+        ::-webkit-scrollbar { display: none; }
+        
+        /* 🍄 裝飾：右側遊樂園波點背景 */
+        .bg-polka-dots {
+            background-color: #ecfdf5; 
+            background-image: radial-gradient(#a7f3d0 2.5px, transparent 2.5px); 
+            background-size: 28px 28px; 
+        }
+
+        .duo-btn-green { background-color: #58cc02; border: 2px solid #58a700; border-bottom: 6px solid #58a700; color: white; border-radius: 1.25rem; cursor: pointer; transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .duo-btn-green:active { border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
+        .duo-btn-green:disabled { background-color: #e5e5e5; border-color: #e5e5e5; border-bottom-color: #cecece; color: #afafaf; transform: none; margin-bottom: 0; cursor: not-allowed; }
+        
+        .duo-btn-blue { background-color: #1cb0f6; border: 2px solid #1899d6; border-bottom: 6px solid #1899d6; color: white; border-radius: 1.25rem; cursor: pointer; transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .duo-btn-blue:active { border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
+        
+        .duo-btn-red { background-color: #ff4b4b; border: 2px solid #ea1515; border-bottom: 6px solid #ea1515; color: white; border-radius: 1.25rem; cursor: pointer; transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .duo-btn-red:active { border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
+        
+        .duo-btn-white { background-color: #ffffff; border: 2px solid #e2e8f0; border-bottom: 6px solid #cbd5e1; color: #64748b; border-radius: 1.25rem; cursor: pointer; transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .duo-btn-white:active { border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
+        .duo-btn-white.active-tab { border-color: #1cb0f6; border-bottom-color: #1cb0f6; color: #1cb0f6; background-color: #ddf4ff; border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
+
+        /* 🍞 裝飾：增強卡片的浮起與 3D 陰影反饋 */
+        .duo-card { background-color: #ffffff; border: 2px solid #cbd5e1; border-radius: 1.5rem; box-shadow: 0 6px 0 #cbd5e1; margin-bottom: 6px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .duo-card:hover { transform: translateY(-4px); box-shadow: 0 10px 0 #94a3b8; border-color: #94a3b8; }
+        .duo-card-yellow { background-color: #ffc800; border: 2px solid #c68900; border-radius: 1.5rem; color: white; box-shadow: 0 6px 0 #c68900; margin-bottom: 6px; }
+        
+        .duo-input { background-color: #f8fafc; border: 2px solid #cbd5e1; border-radius: 1.25rem; color: #334155; font-weight: 800; outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .duo-input:focus { background-color: #ffffff; border-color: #1cb0f6; box-shadow: 0 0 0 4px rgba(28, 176, 246, 0.2); }
+        
+        @keyframes wiggle { 0%, 100% { transform: rotate(-6deg) scale(1.1); } 50% { transform: rotate(6deg) scale(1.1); } }
+        .animate-wiggle { animation: wiggle 0.8s ease-in-out infinite; }
+        
+        .typing-dot { animation: typing 1.4s infinite ease-in-out; fill: #94a3b8; }
         .typing-dot:nth-child(1) { animation-delay: 0s; }
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        .smooth-scroll { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="h-screen w-screen m-0 overflow-hidden font-sans antialiased text-gray-800 bg-[#f8fafc]">
-    <div id="root" class="w-full h-full flex relative overflow-hidden"></div>
+<body>
+    <div id="root" className="w-full h-full flex relative overflow-hidden"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // 🌟 資料庫升級至 v7
-        const DB_KEY_USERS = 'petApp_v7_users'; 
-        const DB_KEY_POSTS = 'petApp_v7_posts'; 
-        const DB_KEY_AUTH = 'petApp_v7_auth';   
-        const DB_KEY_CURRENT_USER = 'petApp_v7_currentUser'; 
-        const DB_KEY_API_TOKEN = 'petApp_v7_geminiToken';
+        const DB_KEY_USERS = 'petApp_v12_users'; 
+        const DB_KEY_POSTS = 'petApp_v12_posts'; 
+        const DB_KEY_AUTH = 'petApp_v12_auth';   
+        const DB_KEY_CURRENT_USER = 'petApp_v12_currentUser'; 
+        const DB_KEY_API_TOKEN = 'petApp_v12_geminiToken';
 
         const defaultPosts = [
             { id: 2, author: 'LeoMom', avatar: '👩', petName: 'Leo', time: '1 小時前', timestamp: Date.now() - 3600000, content: '今天天氣超好，帶 Leo 去了寵物公園，結果牠交到了新朋友！跑了一下午回家直接秒睡 🤣', image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80', likes: 12, likedByMe: false, comments: [{id: 1, author: '王大明', text: '太可愛了吧！'}] },
@@ -52,12 +83,11 @@
 
         const renderAvatar = (avatarStr, fallbackIcon = '👤') => {
             if(avatarStr && avatarStr.startsWith('data:image')) {
-                return <img src={avatarStr} class="w-full h-full object-cover" />;
+                return <img src={avatarStr} className="w-full h-full object-cover" />;
             }
-            return <span class="flex items-center justify-center w-full h-full">{avatarStr || fallbackIcon}</span>;
+            return <span className="flex items-center justify-center w-full h-full font-black text-2xl text-slate-400">{avatarStr || fallbackIcon}</span>;
         };
 
-        // --- 登入畫面 ---
         const LoginScreen = ({ onLogin }) => {
             const [isLoginMode, setIsLoginMode] = useState(true);
             const [email, setEmail] = useState('');
@@ -66,7 +96,6 @@
             const handleAuth = () => {
                 if (!email.trim() || !password.trim()) return alert('請完整輸入信箱與密碼！');
                 const authDb = JSON.parse(localStorage.getItem(DB_KEY_AUTH)) || {};
-                
                 if (isLoginMode) {
                     if (!authDb[email]) return alert('找不到此信箱，請先註冊！');
                     if (authDb[email] !== password) return alert('密碼錯誤！');
@@ -79,30 +108,19 @@
             };
 
             return (
-                <div class="h-full w-full bg-gradient-to-br from-indigo-50 via-white to-blue-50 overflow-y-auto">
-                    <div class="min-h-full flex flex-col items-center justify-center p-6 py-12">
-                        <div class="text-center w-full max-w-sm mb-10 z-10">
-                            <div class="text-6xl mb-6 text-indigo-500 shadow-2xl w-28 h-28 mx-auto bg-white rounded-[2rem] flex items-center justify-center transform rotate-3"><i class="fa-solid fa-paw"></i></div>
-                            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">寵物每一天</h1>
-                            <p class="text-sm text-gray-500 mt-3 font-medium">不只紀錄，更是毛孩專屬的健康管家</p>
+                <div className="h-full w-full overflow-y-auto flex flex-col bg-gradient-to-br from-[#ffe066] to-[#f0f4f8]">
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 py-12 max-w-md mx-auto w-full">
+                        <div className="text-center w-full mb-10">
+                            <div className="text-6xl mb-6 text-[#58cc02] w-28 h-28 mx-auto duo-card flex items-center justify-center bg-white"><i className="fa-solid fa-paw"></i></div>
+                            <h1 className="text-5xl font-black text-slate-800 tracking-tight drop-shadow-sm">寵物每一天</h1>
+                            <p className="text-[16px] text-slate-600 mt-4 font-bold bg-white/50 px-4 py-1.5 rounded-full inline-block">專屬毛孩的健康遊戲管家</p>
                         </div>
-                        <div class="bg-white w-full max-w-sm p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 z-10">
-                            <div class="flex justify-center gap-8 mb-8 border-b border-gray-100 pb-4">
-                                <button onClick={() => setIsLoginMode(true)} class={`font-bold text-lg pb-4 -mb-4 transition-all ${isLoginMode ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}>登入</button>
-                                <button onClick={() => setIsLoginMode(false)} class={`font-bold text-lg pb-4 -mb-4 transition-all ${!isLoginMode ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}>註冊</button>
-                            </div>
-                            <div class="space-y-5">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">電子信箱</label>
-                                    <input type="email" class="w-full bg-gray-50 border-transparent p-4 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} />
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">密碼</label>
-                                    <input type="password" class="w-full bg-gray-50 border-transparent p-4 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" placeholder="輸入密碼" value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAuth()} />
-                                </div>
-                                <button onClick={handleAuth} class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 shadow-[0_8px_20px_rgba(79,70,229,0.3)] transform hover:-translate-y-1 transition-all mt-4">
-                                    {isLoginMode ? '進入系統' : '完成註冊'}
-                                </button>
+                        <div className="w-full space-y-4 duo-card p-8 bg-white/95 backdrop-blur-md">
+                            <input type="email" className="w-full duo-input p-4 text-[16px]" placeholder="輸入電子信箱" value={email} onChange={e => setEmail(e.target.value)} />
+                            <input type="password" className="w-full duo-input p-4 text-[16px]" placeholder="輸入密碼" value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAuth()} />
+                            <div className="w-full space-y-3 pt-6">
+                                <button onClick={() => { setIsLoginMode(true); if(isLoginMode) handleAuth(); }} className={`w-full py-4 font-extrabold text-lg tracking-wide ${isLoginMode ? 'duo-btn-green' : 'duo-btn-white text-slate-400'}`}>登入系統</button>
+                                <button onClick={() => { setIsLoginMode(false); if(!isLoginMode) handleAuth(); }} className={`w-full py-4 font-extrabold text-lg tracking-wide ${!isLoginMode ? 'duo-btn-blue' : 'duo-btn-white text-slate-400'}`}>註冊新帳號</button>
                             </div>
                         </div>
                     </div>
@@ -110,212 +128,158 @@
             );
         };
 
-        // --- 寵物表單 ---
         const PetForm = ({ initialData, onSave, onCancel, title }) => {
             const [formData, setFormData] = useState(initialData || { id: Date.now(), name: '', species: '狗', breed: speciesOptions['狗'][0], customBreed: '', gender: '男', isNeutered: '未絕育', status: '活潑健康' });
-            
             const submit = () => {
                 if (!formData.name.trim()) return alert('請填寫寵物名字！');
                 const finalBreed = formData.breed.includes('其他') ? formData.customBreed : formData.breed;
                 if (!finalBreed.trim()) return alert('請填寫品種！');
                 onSave({ ...formData, breed: finalBreed });
             };
-
             return (
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-50 max-w-md w-full mx-auto my-4">
-                    <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">{title || '寵物資料'}</h2>
-                    <div class="space-y-5">
+                <div className="duo-card p-8 max-w-md w-full mx-auto my-4 bg-white">
+                    <h2 className="text-3xl font-black text-center mb-8 text-slate-800">{title || '建立新角色'}</h2>
+                    <div className="space-y-5">
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">名字</label>
-                            <input type="text" class="w-full bg-gray-50 p-3.5 rounded-xl focus:bg-white border-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：毛毛" />
+                            <label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">名字</label>
+                            <input type="text" className="w-full duo-input p-4" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：毛毛" />
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">物種</label>
-                                <select class="w-full bg-gray-50 p-3.5 rounded-xl border-transparent focus:border-indigo-500 outline-none" value={formData.species} onChange={e => setFormData({...formData, species: e.target.value, breed: speciesOptions[e.target.value][0], customBreed: ''})}>
-                                    {Object.keys(speciesOptions).map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">物種</label>
+                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.species} onChange={e => setFormData({...formData, species: e.target.value, breed: speciesOptions[e.target.value][0], customBreed: ''})}>{Object.keys(speciesOptions).map(s => <option key={s} value={s}>{s}</option>)}</select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">品種</label>
-                                <select class="w-full bg-gray-50 p-3.5 rounded-xl border-transparent focus:border-indigo-500 outline-none" value={formData.breed} onChange={e => setFormData({...formData, breed: e.target.value})}>
-                                    {speciesOptions[formData.species].map(b => <option key={b} value={b}>{b}</option>)}
-                                </select>
+                            <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">品種</label>
+                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.breed} onChange={e => setFormData({...formData, breed: e.target.value})}>{speciesOptions[formData.species].map(b => <option key={b} value={b}>{b}</option>)}</select>
                             </div>
                         </div>
-                        {formData.breed.includes('其他') && (
-                            <input type="text" class="w-full bg-gray-50 p-3.5 rounded-xl outline-none focus:ring-2 focus:ring-indigo-200" value={formData.customBreed} onChange={e => setFormData({...formData, customBreed: e.target.value})} placeholder="請輸入品種" />
-                        )}
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">性別</label>
-                                <select class="w-full bg-gray-50 p-3.5 rounded-xl outline-none" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}><option value="男">男生</option><option value="女">女生</option></select>
+                        {formData.breed.includes('其他') && <input type="text" className="w-full duo-input p-4" value={formData.customBreed} onChange={e => setFormData({...formData, customBreed: e.target.value})} placeholder="請輸入品種" />}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">性別</label>
+                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}><option value="男">男生</option><option value="女">女生</option></select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">絕育狀態</label>
-                                <select class="w-full bg-gray-50 p-3.5 rounded-xl outline-none" value={formData.isNeutered} onChange={e => setFormData({...formData, isNeutered: e.target.value})}><option value="未絕育">未絕育</option><option value="已絕育">已絕育</option></select>
+                            <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">絕育狀態</label>
+                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.isNeutered} onChange={e => setFormData({...formData, isNeutered: e.target.value})}><option value="未絕育">未絕育</option><option value="已絕育">已絕育</option></select>
                             </div>
                         </div>
-                        <div class="pt-4 flex gap-3">
-                            {onCancel && <button onClick={onCancel} class="flex-1 bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl hover:bg-gray-200 transition-colors">取消</button>}
-                            <button onClick={submit} class="flex-1 bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 shadow-md transition-colors">儲存檔案</button>
+                        <div className="pt-6 flex flex-col md:flex-row gap-4">
+                            {onCancel && <button onClick={onCancel} className="w-full duo-btn-white py-4 font-extrabold text-lg">取消</button>}
+                            <button onClick={submit} className="w-full duo-btn-green py-4 font-extrabold text-lg tracking-wider">確認完成</button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- 註冊流程引導 ---
         const OnboardingWizard = ({ onComplete }) => {
             const [pets, setPets] = useState([]);
             const [isAdding, setIsAdding] = useState(true);
 
-            const handleSavePet = (petData) => {
-                setPets([...pets, petData]);
-                setIsAdding(false);
-            };
+            const handleSavePet = (petData) => { setPets([...pets, petData]); setIsAdding(false); };
 
-            if (isAdding) {
-                return (
-                    <div class="h-full w-full bg-gradient-to-br from-indigo-50 to-blue-50 flex flex-col items-center justify-center p-4 overflow-y-auto">
-                        <PetForm 
-                            key={pets.length} 
-                            title={pets.length === 0 ? "建立第一隻寵物" : "新增其他寵物"} 
-                            onSave={handleSavePet} 
-                            onCancel={pets.length > 0 ? () => setIsAdding(false) : null} 
-                        />
-                    </div>
-                );
-            }
+            if (isAdding) return <div className="h-full w-full flex flex-col items-center justify-center p-4 overflow-y-auto bg-[#f0f4f8]"><PetForm key={pets.length} title={pets.length === 0 ? "建立第一隻寵物角色" : "新增其他寵物角色"} onSave={handleSavePet} onCancel={pets.length > 0 ? () => setIsAdding(false) : null} /></div>;
 
             return (
-                <div class="h-full w-full bg-gradient-to-br from-indigo-50 to-blue-50 flex flex-col items-center justify-center p-4 overflow-y-auto">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-50">
-                        <div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 shadow-inner"><i class="fa-solid fa-check"></i></div>
-                        <h2 class="text-3xl font-extrabold mb-2 text-gray-900">太棒了！</h2>
-                        <p class="text-gray-500 mb-8 font-medium">您目前已建立了 {pets.length} 隻毛孩檔案</p>
-                        
-                        <div class="space-y-3 mb-8 text-left">
+                <div className="h-full w-full flex flex-col items-center justify-center p-4 overflow-y-auto bg-[#f0f4f8]">
+                    <div className="duo-card p-10 max-w-md w-full text-center bg-white">
+                        <div className="w-28 h-28 bg-[#58cc02] text-white rounded-full flex items-center justify-center text-6xl mx-auto mb-8 border-b-8 border-[#58a700]"><i className="fa-solid fa-check"></i></div>
+                        <h2 className="text-4xl font-black mb-4 text-slate-800">太棒了！</h2>
+                        <p className="text-slate-500 mb-8 font-extrabold text-lg">您已解鎖 {pets.length} 隻毛孩角色</p>
+                        <div className="space-y-4 mb-10 text-left">
                             {pets.map(p => (
-                                <div key={p.id} class="bg-gray-50/80 p-3.5 rounded-2xl flex items-center justify-between border border-gray-100">
-                                    <div class="flex items-center gap-3.5">
-                                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-2xl border border-gray-50">
-                                            {p.species === '貓' ? '🐱' : p.species === '狗' ? '🐶' : '🐾'}
-                                        </div>
+                                <div key={p.id} className="duo-card p-4 flex items-center justify-between border-2 border-[#e2e8f0] shadow-sm mb-0">
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-16 h-16 rounded-full bg-[#f8fafc] flex items-center justify-center text-4xl border-2 border-[#e2e8f0] shadow-inner">{p.species === '貓' ? '🐱' : p.species === '狗' ? '🐶' : '🐾'}</div>
                                         <div>
-                                            <p class="font-bold text-gray-800">{p.name}</p>
-                                            <p class="text-xs text-gray-400 font-medium">{p.breed}</p>
+                                            <p className="font-black text-xl text-slate-800">{p.name}</p>
+                                            <p className="text-[14px] text-slate-500 font-extrabold mt-1">{p.breed}</p>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        
-                        <div class="space-y-3">
-                            <button onClick={() => setIsAdding(true)} class="w-full py-4 border-2 border-dashed border-indigo-200 text-indigo-600 font-bold rounded-2xl hover:bg-indigo-50 hover:border-indigo-300 transition-all flex justify-center items-center gap-2">
-                                <i class="fa-solid fa-plus"></i> 繼續新增寵物
-                            </button>
-                            <button onClick={() => onComplete(pets)} class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 hover:-translate-y-0.5 transition-all">
-                                完成設定，進入系統
-                            </button>
+                        <div className="space-y-4">
+                            <button onClick={() => setIsAdding(true)} className="w-full duo-btn-white py-4 font-extrabold text-lg text-[#1cb0f6]"><i className="fa-solid fa-plus mr-2"></i> 新增更多寵物</button>
+                            <button onClick={() => onComplete(pets)} className="w-full duo-btn-green py-4 font-extrabold text-lg tracking-wider text-xl">開始每日任務！</button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- 設定 Modal (🌟 加入系統內「新增寵物」入口) ---
         const SettingsModal = ({ userData, onClose, onUpdateUser }) => {
             const [name, setName] = useState(userData.name);
             const [avatar, setAvatar] = useState(userData.avatar);
             const [editingPet, setEditingPet] = useState(null);
-            const [isCreatingPet, setIsCreatingPet] = useState(false); // 控制新增寵物表單
+            const [isCreatingPet, setIsCreatingPet] = useState(false); 
             const [apiKey, setApiKey] = useState(localStorage.getItem(DB_KEY_API_TOKEN) || '');
             const avatarInputRef = useRef(null);
 
-            const handleSave = () => { 
-                onUpdateUser({ ...userData, name, avatar }); 
-                localStorage.setItem(DB_KEY_API_TOKEN, apiKey);
-                onClose(); 
-            };
+            const handleSave = () => { onUpdateUser({ ...userData, name, avatar }); localStorage.setItem(DB_KEY_API_TOKEN, apiKey); onClose(); };
 
-            // 如果正在編輯或新增寵物，顯示對應的表單
-            if (editingPet) return <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"><PetForm initialData={editingPet} title="編輯寵物資料" onSave={(updatedPet) => { onUpdateUser({ ...userData, pets: userData.pets.map(p => p.id === updatedPet.id ? updatedPet : p) }); setEditingPet(null); }} onCancel={() => setEditingPet(null)} /></div>;
-            
-            if (isCreatingPet) return <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"><PetForm title="新增寵物資料" onSave={(newPet) => { onUpdateUser({ ...userData, pets: [...userData.pets, newPet] }); setIsCreatingPet(false); }} onCancel={() => setIsCreatingPet(false)} /></div>;
+            if (editingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><PetForm initialData={editingPet} title="編輯角色資料" onSave={(updatedPet) => { onUpdateUser({ ...userData, pets: userData.pets.map(p => p.id === updatedPet.id ? updatedPet : p) }); setEditingPet(null); }} onCancel={() => setEditingPet(null)} /></div>;
+            if (isCreatingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><PetForm title="解鎖新角色" onSave={(newPet) => { onUpdateUser({ ...userData, pets: [...userData.pets, newPet] }); setIsCreatingPet(false); }} onCancel={() => setIsCreatingPet(false)} /></div>;
 
             return (
-                <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div class="bg-white w-full max-w-md rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-                        <div class="p-6 flex justify-between items-center bg-gray-50/50 border-b border-gray-100">
-                            <h3 class="font-bold text-xl text-gray-800">管理設定</h3>
-                            <button onClick={onClose} class="text-gray-400 hover:text-red-500 bg-white w-8 h-8 rounded-full shadow-sm flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+                    <div className="bg-[#f8fafc] w-full max-w-lg rounded-3xl overflow-hidden flex flex-col max-h-[95vh] border-4 border-white shadow-2xl">
+                        <div className="p-6 flex justify-between items-center border-b-2 border-slate-200 bg-white">
+                            <h3 className="font-black text-2xl text-slate-800">玩家與系統設定</h3>
+                            <button onClick={onClose} className="text-slate-400 hover:text-[#ff4b4b] w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center font-bold transition-colors text-lg"><i className="fa-solid fa-xmark"></i></button>
                         </div>
-                        <div class="p-6 overflow-y-auto flex-1">
-                            <h4 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">主人資料</h4>
-                            <div class="flex items-center gap-5 mb-8 bg-gray-50 p-4 rounded-2xl">
-                                <div class="relative w-20 h-20 rounded-[1.5rem] overflow-hidden border-4 border-white shadow-md bg-indigo-50 cursor-pointer group flex-shrink-0" onClick={() => avatarInputRef.current.click()}>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <h4 className="text-sm font-black text-slate-400 mb-4 uppercase tracking-wider">玩家資料</h4>
+                            <div className="flex items-center gap-6 mb-8 duo-card p-6 bg-white border-slate-200 shadow-sm">
+                                <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-100 cursor-pointer group flex-shrink-0" onClick={() => avatarInputRef.current.click()}>
                                     {renderAvatar(avatar)}
-                                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-camera text-white"></i></div>
+                                    <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i className="fa-solid fa-camera text-white text-2xl"></i></div>
                                 </div>
-                                <input type="file" accept="image/*" class="hidden" ref={avatarInputRef} onChange={e => {
+                                <input type="file" accept="image/*" className="hidden" ref={avatarInputRef} onChange={e => {
                                     if (e.target.files[0]) { const reader = new FileReader(); reader.onloadend = () => setAvatar(reader.result); reader.readAsDataURL(e.target.files[0]); }
                                 }} />
-                                <div class="flex-1">
-                                    <label class="block text-xs font-bold text-gray-500 mb-1">顯示名稱</label>
-                                    <input type="text" class="w-full border-none bg-white shadow-sm p-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-100" value={name} onChange={e => setName(e.target.value)} />
+                                <div className="flex-1">
+                                    <label className="block text-xs font-black text-slate-400 mb-2 uppercase tracking-wide">顯示名稱</label>
+                                    <input type="text" className="w-full duo-input p-4 text-[16px]" value={name} onChange={e => setName(e.target.value)} />
                                 </div>
                             </div>
-                            
-                            <h4 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider flex justify-between">
-                                <span>AI 診斷引擎設定</span>
-                                <a href="https://aistudio.google.com/" target="_blank" class="text-indigo-500 hover:underline">取得 Key</a>
+                            <h4 className="text-sm font-black text-slate-400 mb-4 uppercase tracking-wider flex justify-between items-center">
+                                <span>AI 博士引擎 (Gemini API)</span><a href="https://aistudio.google.com/" target="_blank" className="text-[#1cb0f6] hover:underline text-xs">取得 Key</a>
                             </h4>
-                            <div class="mb-8 bg-indigo-50 p-4 rounded-2xl border border-indigo-100/50">
-                                <label class="block text-xs font-bold text-indigo-700 mb-2">Gemini API Key (本機安全儲存)</label>
-                                <input type="password" class="w-full border-none bg-white shadow-sm p-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 text-sm" placeholder="AIzaSy..." value={apiKey} onChange={e => setApiKey(e.target.value)} />
-                                <p class="text-[10px] text-indigo-500 mt-2 leading-relaxed">此金鑰僅會儲存在您的瀏覽器本地端，不會上傳至任何伺服器。若要使用 AI 急診室的影像分析功能，請填寫有效金鑰。</p>
+                            <div className="mb-8 duo-card p-6 bg-[#ddf4ff] border-[#1cb0f6] shadow-[0_4px_0_#1cb0f6]">
+                                <input type="password" className="w-full duo-input border-white p-4 text-[16px] bg-white" placeholder="AIzaSy..." value={apiKey} onChange={e => setApiKey(e.target.value)} />
+                                <p className="text-[13px] text-[#1899d6] mt-3 font-extrabold">將 Key 存在本機，解鎖 AI 獸醫博士的圖片診斷技能！</p>
                             </div>
-
-                            <h4 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">管理寵物</h4>
-                            <div class="space-y-3">
+                            <h4 className="text-sm font-black text-slate-400 mb-4 uppercase tracking-wider">管理寵物角色</h4>
+                            <div className="space-y-4">
                                 {userData.pets.map(p => (
-                                    <div key={p.id} class="bg-white border border-gray-100 rounded-2xl p-4 flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center">{p.species === '貓'?'🐱':p.species === '狗'?'🐶':'🐾'}</div>
+                                    <div key={p.id} className="duo-card p-5 flex justify-between items-center bg-white border-slate-200 shadow-sm mb-0">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-14 h-14 rounded-full bg-slate-100 text-3xl flex items-center justify-center border-2 border-slate-200">{p.species === '貓'?'🐱':p.species === '狗'?'🐶':'🐾'}</div>
                                             <div>
-                                                <p class="font-bold text-gray-800">{p.name}</p>
-                                                <p class="text-xs text-gray-400 mt-0.5">{p.breed} · {p.gender}</p>
+                                                <p className="font-black text-xl text-slate-800">{p.name}</p>
+                                                <p className="text-[13px] text-slate-500 mt-1 font-extrabold">{p.breed}</p>
                                             </div>
                                         </div>
-                                        <button onClick={() => setEditingPet(p)} class="text-indigo-600 font-bold bg-indigo-50 px-4 py-2 rounded-xl text-sm hover:bg-indigo-100">編輯</button>
+                                        <button onClick={() => setEditingPet(p)} className="duo-btn-white py-2 px-5 text-[#1cb0f6] text-[15px] font-extrabold border-b-4 bg-slate-50">編輯</button>
                                     </div>
                                 ))}
-                                
-                                {/* 🌟 系統內部新增寵物入口 */}
-                                <button onClick={() => setIsCreatingPet(true)} class="w-full py-4 border-2 border-dashed border-indigo-200 text-indigo-500 font-bold rounded-2xl hover:bg-indigo-50 hover:border-indigo-300 transition-all flex justify-center items-center gap-2 mt-2">
-                                    <i class="fa-solid fa-plus"></i> 新增寵物檔案
-                                </button>
+                                <button onClick={() => setIsCreatingPet(true)} className="w-full duo-btn-white py-4 text-[#58cc02] font-black text-lg border-b-4 bg-white mt-2"><i className="fa-solid fa-plus mr-2"></i> 招募新角色</button>
                             </div>
                         </div>
-                        <div class="p-6 border-t border-gray-50 bg-white">
-                            <button onClick={handleSave} class="w-full bg-indigo-900 text-white font-bold py-4 rounded-2xl hover:bg-indigo-800 shadow-lg transition-transform hover:-translate-y-0.5">儲存所有設定</button>
+                        <div className="p-6 border-t-2 border-slate-200 bg-white">
+                            <button onClick={handleSave} className="w-full duo-btn-green py-4 font-black text-xl tracking-wider">儲存設定</button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- 動態牆 ---
         const HomeTab = ({ userData, posts, setPosts }) => {
             const [inputText, setInputText] = useState('');
             const [imagePreview, setImagePreview] = useState(null);
             const [selectedPetId, setSelectedPetId] = useState(userData.pets[0]?.id);
             const [now, setNow] = useState(Date.now());
-            
             const [commentingOn, setCommentingOn] = useState(null);
             const [commentTexts, setCommentTexts] = useState({});
-
             const fileInputRef = useRef(null);
 
             useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 60000); return () => clearInterval(timer); }, []);
@@ -324,12 +288,11 @@
                 if (!inputText.trim() && !imagePreview) return;
                 const pet = userData.pets.find(p => p.id === selectedPetId);
                 const newPost = { 
-                    id: Date.now(), author: userData.name, avatar: userData.avatar, petName: pet.name, 
+                    id: Date.now(), author: userData.name, avatar: userData.avatar, petName: pet?.name || '未知', 
                     time: '剛剛', timestamp: Date.now(), content: inputText, image: imagePreview, likes: 0, likedByMe: false, comments: []
                 };
                 const updated = [newPost, ...posts];
-                setPosts(updated);
-                localStorage.setItem(DB_KEY_POSTS, JSON.stringify(updated));
+                setPosts(updated); localStorage.setItem(DB_KEY_POSTS, JSON.stringify(updated));
                 setInputText(''); setImagePreview(null);
             };
 
@@ -342,15 +305,11 @@
                 const text = commentTexts[postId];
                 if(!text || !text.trim()) return;
                 const updated = posts.map(p => {
-                    if (p.id === postId) {
-                        return { ...p, comments: [...p.comments, { id: Date.now(), author: userData.name, text: text }] };
-                    }
+                    if (p.id === postId) return { ...p, comments: [...p.comments, { id: Date.now(), author: userData.name, text: text }] };
                     return p;
                 });
-                setPosts(updated);
-                localStorage.setItem(DB_KEY_POSTS, JSON.stringify(updated));
-                setCommentTexts({...commentTexts, [postId]: ''}); 
-                setCommentingOn(null);
+                setPosts(updated); localStorage.setItem(DB_KEY_POSTS, JSON.stringify(updated));
+                setCommentTexts({...commentTexts, [postId]: ''}); setCommentingOn(null);
             };
 
             const getRelativeTime = (ts) => {
@@ -363,79 +322,89 @@
             };
 
             return (
-                <div class="p-4 md:p-8 overflow-y-auto h-full pb-24 md:pb-8 smooth-scroll">
-                    <h2 class="text-3xl font-extrabold mb-6 text-gray-900 tracking-tight">社群動態</h2>
+                <div className="p-4 md:p-8 overflow-y-auto h-full pb-24 md:pb-8 max-w-4xl mx-auto w-full">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3"><span className="text-4xl">🏕️</span> 動態村</h2>
+                    </div>
                     
-                    <div class="bg-white p-5 rounded-[2rem] mb-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-50 bg-gray-50 flex-shrink-0">{renderAvatar(userData.avatar)}</div>
-                            <div class="flex-1 bg-gray-50 rounded-xl px-3 py-1 flex items-center">
-                                <span class="text-sm text-gray-500 mr-2">主角是：</span>
-                                <select class="bg-transparent text-indigo-700 font-bold outline-none flex-1 py-1" value={selectedPetId} onChange={e => setSelectedPetId(Number(e.target.value))}>
+                    {/* 🍞 裝飾：發布區塊底部加粗，增加厚重感 */}
+                    <div className="duo-card p-6 mb-10 bg-white border-b-[8px] border-slate-200">
+                        <div className="flex items-center gap-4 mb-5">
+                            <div className="w-14 h-14 rounded-full overflow-hidden ring-4 ring-slate-50 bg-slate-100 flex-shrink-0 z-10">{renderAvatar(userData.avatar)}</div>
+                            <div className="flex-1 bg-slate-50 rounded-2xl border-2 border-slate-200 px-4 py-2 flex items-center transition-colors hover:border-slate-300">
+                                <span className="text-[15px] text-slate-500 mr-2 font-extrabold"><i className="fa-solid fa-bullhorn mr-1"></i> 主角：</span>
+                                <select className="bg-transparent text-[#1cb0f6] font-black outline-none flex-1 py-1 cursor-pointer text-[16px]" value={selectedPetId} onChange={e => setSelectedPetId(Number(e.target.value))}>
                                     {userData.pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
                             </div>
                         </div>
-                        <textarea class="w-full p-2 border-none bg-transparent text-base focus:ring-0 outline-none resize-none" rows="2" placeholder="分享今天的趣事..." value={inputText} onChange={e => setInputText(e.target.value)}></textarea>
+                        {/* 🍞 裝飾：輸入框加上 shadow-inner 內凹立體感 */}
+                        <textarea className="w-full duo-input p-5 mb-4 resize-none min-h-[100px] text-lg placeholder-slate-400 bg-slate-50 shadow-inner" placeholder="今天有什麼好玩的？🦴" value={inputText} onChange={e => setInputText(e.target.value)}></textarea>
                         
                         {imagePreview && (
-                            <div class="relative mb-3 inline-block w-full">
-                                <img src={imagePreview} class="w-full h-auto max-h-[300px] object-contain bg-gray-50 rounded-xl shadow-sm border border-gray-100" />
-                                <button onClick={() => setImagePreview(null)} class="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                            <div className="relative inline-block w-full mb-4">
+                                <img src={imagePreview} className="w-full h-auto max-h-[300px] object-contain bg-slate-100 rounded-2xl border-2 border-slate-200" />
+                                <button onClick={() => setImagePreview(null)} className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center duo-btn-red !p-0 !border-b-4 text-xl"><i className="fa-solid fa-xmark"></i></button>
                             </div>
                         )}
-                        <div class="flex justify-between items-center mt-2 pt-3 border-t border-gray-50">
-                            <input type="file" accept="image/*" class="hidden" ref={fileInputRef} onChange={e => {
+                        <div className="flex justify-between items-center">
+                            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={e => {
                                 if (e.target.files[0]) { const reader = new FileReader(); reader.onloadend = () => setImagePreview(reader.result); reader.readAsDataURL(e.target.files[0]); }
                             }} />
-                            <button onClick={() => fileInputRef.current.click()} class="text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                                <i class="fa-solid fa-image text-lg"></i> 加入照片
+                            <button onClick={() => fileInputRef.current.click()} className="duo-btn-white py-3 px-5 text-[#1cb0f6] font-black text-[16px] border-b-4 bg-slate-50">
+                                <i className="fa-solid fa-image text-xl mr-2"></i> 照片
                             </button>
-                            <button onClick={handlePublish} class="bg-indigo-600 text-white px-8 py-2.5 rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">發布</button>
+                            <button onClick={handlePublish} className="duo-btn-green py-3 px-10 font-black text-[16px] border-b-4 tracking-widest text-lg">發布</button>
                         </div>
                     </div>
 
-                    <div class="space-y-6">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="h-1 flex-1 bg-slate-200/60 rounded-full"></div>
+                        <span className="text-slate-500 font-black uppercase tracking-widest text-sm bg-white/60 px-4 py-1 rounded-full border-2 border-slate-200/50 backdrop-blur-sm shadow-sm">最新動態</span>
+                        <div className="h-1 flex-1 bg-slate-200/60 rounded-full"></div>
+                    </div>
+
+                    <div className="space-y-8">
                         {posts.map(post => (
-                            <div key={post.id} class="bg-white rounded-[2rem] p-5 shadow-[0_2px_15px_rgb(0,0,0,0.02)] border border-gray-100">
-                                <div class="flex items-center mb-4">
-                                    <div class="w-12 h-12 rounded-full overflow-hidden mr-3 bg-gray-50 border border-gray-100">{renderAvatar(post.avatar)}</div>
+                            <div key={post.id} className="duo-card p-6 bg-white">
+                                <div className="flex items-center mb-5">
+                                    <div className="w-14 h-14 rounded-full overflow-hidden mr-4 bg-slate-100 border-2 border-slate-200 shadow-sm">{renderAvatar(post.avatar)}</div>
                                     <div>
-                                        <p class="font-bold text-gray-900">{post.author} <i class="fa-solid fa-caret-right text-gray-300 mx-1 text-xs"></i> <span class="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md text-xs">{post.petName}</span></p>
-                                        <p class="text-xs text-gray-400 mt-0.5">{getRelativeTime(post.timestamp)}</p>
+                                        <p className="font-black text-lg text-slate-800 flex items-center">
+                                            {post.author} 
+                                            <i className="fa-solid fa-caret-right text-slate-300 mx-2 text-sm"></i> 
+                                            <span className="text-[#1cb0f6] bg-[#ddf4ff] px-3 py-1 rounded-lg text-sm border-2 border-transparent">{post.petName}</span>
+                                        </p>
+                                        <p className="text-[13px] text-slate-400 mt-1 font-extrabold"><i className="fa-regular fa-clock mr-1"></i> {getRelativeTime(post.timestamp)}</p>
                                     </div>
                                 </div>
-                                <p class="text-[15px] text-gray-700 whitespace-pre-wrap leading-relaxed mb-4 px-1">{post.content}</p>
+                                <p className="text-[17px] text-slate-700 whitespace-pre-wrap leading-relaxed mb-5 font-bold px-1">{post.content}</p>
                                 
                                 {post.image && (
-                                    <img src={post.image} class="w-full h-auto max-h-[450px] object-contain bg-black/5 rounded-2xl mb-4 shadow-sm border border-gray-100" />
+                                    <img src={post.image} className="w-full h-auto max-h-[450px] object-contain rounded-2xl mb-5 border-2 border-slate-200 bg-slate-50" />
                                 )}
                                 
-                                <div class="flex items-center gap-6 pt-2 text-gray-400 px-1">
-                                    <button onClick={() => toggleLike(post.id)} class={`flex items-center gap-2 text-sm font-bold transition-colors ${post.likedByMe ? 'text-pink-500' : 'hover:text-pink-500'}`}>
-                                        <i class={`${post.likedByMe ? 'fa-solid' : 'fa-regular'} fa-heart text-lg`}></i> {post.likes}
+                                <div className="flex items-center gap-8 pt-5 border-t-2 border-slate-100 text-slate-400 px-1">
+                                    <button onClick={() => toggleLike(post.id)} className={`flex items-center gap-2 text-[16px] font-black transition-transform hover:scale-110 active:scale-95 ${post.likedByMe ? 'text-[#ff4b4b]' : 'hover:text-[#ff4b4b]'}`}>
+                                        <i className={`${post.likedByMe ? 'fa-solid' : 'fa-regular'} fa-heart text-2xl`}></i> {post.likes}
                                     </button>
-                                    <button onClick={() => setCommentingOn(commentingOn === post.id ? null : post.id)} class="flex items-center gap-2 text-sm font-bold hover:text-indigo-500 transition-colors">
-                                        <i class="fa-regular fa-comment text-lg"></i> {post.comments.length}
+                                    <button onClick={() => setCommentingOn(commentingOn === post.id ? null : post.id)} className="flex items-center gap-2 text-[16px] font-black hover:text-[#1cb0f6] transition-transform hover:scale-110 active:scale-95">
+                                        <i className="fa-regular fa-comment text-2xl"></i> {post.comments.length}
                                     </button>
                                 </div>
 
                                 {(post.comments.length > 0 || commentingOn === post.id) && (
-                                    <div class="mt-4 bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
+                                    <div className="mt-6 bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 shadow-inner">
                                         {post.comments.map(c => (
-                                            <div key={c.id} class="mb-2.5 last:mb-0 text-[14px]">
-                                                <span class="font-bold text-gray-800 mr-2">{c.author}</span>
-                                                <span class="text-gray-600">{c.text}</span>
+                                            <div key={c.id} className="mb-4 last:mb-0 text-[15px]">
+                                                <span className="font-black text-slate-800 mr-2">{c.author}</span>
+                                                <span className="text-slate-600 font-bold">{c.text}</span>
                                             </div>
                                         ))}
                                         {commentingOn === post.id && (
-                                            <div class="flex gap-2 mt-3 pt-3 border-t border-gray-200/60">
-                                                <input type="text" class="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all" 
-                                                    placeholder={`回覆 ${post.author}...`} 
-                                                    value={commentTexts[post.id] || ''} 
-                                                    onChange={e => setCommentTexts({...commentTexts, [post.id]: e.target.value})} 
-                                                    onKeyPress={e => e.key === 'Enter' && submitComment(post.id)} autoFocus />
-                                                <button onClick={() => submitComment(post.id)} class="bg-indigo-600 text-white font-bold text-sm px-4 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">送出</button>
+                                            <div className="flex gap-3 mt-5 pt-5 border-t-2 border-slate-200">
+                                                <input type="text" className="flex-1 duo-input p-3.5 text-[15px] bg-white shadow-sm" placeholder={`回覆 ${post.author}...`} value={commentTexts[post.id] || ''} onChange={e => setCommentTexts({...commentTexts, [post.id]: e.target.value})} onKeyPress={e => e.key === 'Enter' && submitComment(post.id)} autoFocus />
+                                                <button onClick={() => submitComment(post.id)} className="duo-btn-blue px-6 font-black text-[15px] border-b-4">回覆</button>
                                             </div>
                                         )}
                                     </div>
@@ -447,7 +416,6 @@
             );
         };
 
-        // --- 健康與提醒 ---
         const CareDashboardTab = ({ userData, onUpdateUser, posts }) => {
             const [selectedPetId, setSelectedPetId] = useState(userData.pets[0]?.id);
             const [reminders, setReminders] = useState(userData.customReminders || []);
@@ -457,23 +425,19 @@
 
             const getBreedRecommendation = (pet) => {
                 const b = pet.breed || '';
-                if (b.includes('鬥牛') || b.includes('巴哥') || b.includes('短吻')) return { name: '透氣防衝撞胸背帶', desc: '短吻犬呼吸道較短，使用胸背帶可大幅降低頸部壓力。', tag: '短吻護理', icon: 'fa-vest', color: 'from-purple-500 to-indigo-500', bg: 'bg-purple-50' };
-                if (b.includes('柯基') || b.includes('臘腸')) return { name: '寵物護脊斜坡階梯', desc: '短腿犬脊椎負擔大，請絕對避免讓牠們頻繁跳躍沙發或上下樓梯。', tag: '護脊關鍵', icon: 'fa-stairs', color: 'from-orange-500 to-red-500', bg: 'bg-orange-50' };
-                if (b.includes('哈士奇') || b.includes('邊境') || b.includes('柴犬')) return { name: '高難度益智漏食玩具', desc: '高智商且精力旺盛，需要大量益智遊戲消耗腦力，避免拆家。', tag: '精力消耗', icon: 'fa-puzzle-piece', color: 'from-red-500 to-pink-500', bg: 'bg-red-50' };
-                if (b.includes('橘貓') || b.includes('胖')) return { name: '低碳水體重控制糧', desc: '十隻橘貓九隻胖，為了保護關節與心血管健康，請嚴格控管熱量！', tag: '易胖體質', icon: 'fa-weight-scale', color: 'from-amber-400 to-orange-500', bg: 'bg-amber-50' };
-                if (b.includes('英國短毛') || b.includes('波斯')) return { name: '專業化毛粉與勤梳毛', desc: '毛髮濃密，換季時需加強排毛，避免引發毛球症影響食慾。', tag: '腸胃健康', icon: 'fa-seedling', color: 'from-green-400 to-emerald-500', bg: 'bg-green-50' };
-                
-                return pet.species === '貓' 
-                    ? { name: '嚴選凍乾主食餐 / 鮮肉罐', desc: '符合貓咪純肉食天性，增加水分攝取並維持優良肌肉量。', tag: '優質蛋白', icon: 'fa-fish', color: 'from-blue-400 to-cyan-500', bg: 'bg-blue-50' }
-                    : { name: '全效型綜合維他命', desc: '補充日常所需微量元素，維持毛髮亮麗與增強免疫力。', tag: '日常保健', icon: 'fa-pills', color: 'from-indigo-400 to-blue-500', bg: 'bg-indigo-50' };
+                if (b.includes('鬥牛') || b.includes('巴哥') || b.includes('短吻')) return { name: '防衝撞胸背帶', desc: '短吻犬呼吸道短，使用胸背帶可降低頸部壓力。', tag: '專屬裝備', icon: 'fa-vest', color: 'duo-card-yellow' };
+                if (b.includes('柯基') || b.includes('臘腸')) return { name: '護脊斜坡階梯', desc: '短腿犬脊椎負擔大，請避免跳躍沙發或樓梯。', tag: '專屬裝備', icon: 'fa-stairs', color: 'duo-card-yellow' };
+                if (b.includes('哈士奇') || b.includes('邊境') || b.includes('柴犬')) return { name: '益智漏食玩具', desc: '高智商精力旺盛，需要遊戲消耗腦力。', tag: '每日挑戰', icon: 'fa-puzzle-piece', color: 'duo-card-yellow' };
+                if (b.includes('橘貓') || b.includes('胖')) return { name: '體重控制計畫', desc: '保護關節與心血管健康，請嚴格控管熱量！', tag: '健康目標', icon: 'fa-weight-scale', color: 'duo-card-yellow' };
+                if (b.includes('英國短毛') || b.includes('波斯')) return { name: '每日梳毛任務', desc: '毛髮濃密，需加強排毛，避免引發毛球症。', tag: '日常保養', icon: 'fa-seedling', color: 'duo-card-yellow' };
+                return pet.species === '貓' ? { name: '優質蛋白補給', desc: '符合肉食天性，增加水分攝取維持肌肉量。', tag: '營養目標', icon: 'fa-fish', color: 'duo-card-yellow' } : { name: '每日維他命', desc: '補充微量元素，維持毛髮亮麗與增強免疫力。', tag: '營養目標', icon: 'fa-pills', color: 'duo-card-yellow' };
             };
 
             const addReminder = (petId) => {
                 const data = newReminderData[petId];
-                if(!data || !data.text?.trim() || !data.date) return alert('請填寫提醒事項與日期！');
+                if(!data || !data.text?.trim() || !data.date) return alert('請填寫任務與日期！');
                 const updated = [...reminders, { id: Date.now(), petId, text: data.text, targetDate: data.date, completed: false }];
-                setReminders(updated);
-                onUpdateUser({...userData, customReminders: updated});
+                setReminders(updated); onUpdateUser({...userData, customReminders: updated});
                 setNewReminderData({...newReminderData, [petId]: { text: '', date: '' }});
             };
 
@@ -500,98 +464,104 @@
             const showWarning = (pet.gender === '女' && pet.isNeutered === '未絕育') || noPostToday || urgentCount > 0;
 
             return (
-                <div class="p-4 md:p-8 overflow-y-auto h-full pb-24 md:pb-8 smooth-scroll space-y-8">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-                        <div>
-                            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">健康與提醒</h2>
-                            <p class="text-sm text-gray-500 mt-2">為每個毛孩量身打造的照護看板</p>
+                <div className="p-4 md:p-8 overflow-y-auto h-full pb-24 md:pb-8 max-w-4xl mx-auto w-full">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3"><span className="text-4xl">🎯</span> 每日任務</h2>
+                            <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl px-4 py-2 shadow-[0_4px_0_#e2e8f0] font-black text-[#ffc800] text-xl transform rotate-2">
+                                <i className="fa-solid fa-fire mr-2 text-2xl"></i> 1 天
+                            </div>
                         </div>
-                        <div class="flex items-center bg-white rounded-2xl px-4 py-2 shadow-sm border border-gray-100">
-                            <span class="text-sm text-gray-500 mr-2">當前寵物：</span>
-                            <select class="bg-transparent text-indigo-700 font-bold outline-none cursor-pointer text-sm" value={selectedPetId} onChange={e => setSelectedPetId(Number(e.target.value))}>
+                        <div className="duo-card p-2 bg-slate-50 border-2 border-slate-200 inline-flex items-center mb-0">
+                            <span className="text-[14px] text-slate-400 mx-2 font-black">角色：</span>
+                            <select className="bg-transparent text-[#1cb0f6] font-black outline-none cursor-pointer text-[16px]" value={selectedPetId} onChange={e => setSelectedPetId(Number(e.target.value))}>
                                 {userData.pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                             </select>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] border border-gray-100/50">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-16 h-16 rounded-[1.2rem] bg-indigo-50 text-indigo-500 flex items-center justify-center text-3xl shadow-inner">
+                    <div className="duo-card p-6 shadow-sm mb-6 bg-white border-b-[8px] border-slate-200">
+                        <div className="flex items-center gap-5 mb-6 border-b-2 border-slate-100 pb-6">
+                            <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-slate-200 flex items-center justify-center text-4xl shadow-inner">
                                 {pet.species === '貓'?'🐱':pet.species === '狗'?'🐶':'🐾'}
                             </div>
                             <div>
-                                <h3 class="text-2xl font-bold text-gray-900">{pet.name}</h3>
-                                <p class="text-sm font-medium text-gray-400 mt-1">{pet.breed} · {pet.gender} ({pet.isNeutered})</p>
+                                <h3 className="text-3xl font-black text-slate-800">{pet.name} 的等級資訊</h3>
+                                <p className="text-[16px] font-extrabold text-slate-400 mt-2 bg-slate-50 px-3 py-1 rounded-lg inline-block border border-slate-200">{pet.breed} · {pet.gender} ({pet.isNeutered})</p>
                             </div>
                         </div>
 
-                        <div class={`relative overflow-hidden rounded-2xl p-5 mb-6 text-white bg-gradient-to-r ${rec.color} shadow-md`}>
-                            <div class="relative z-10">
-                                <div class="flex justify-between items-start mb-2">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-white/80"><i class="fa-solid fa-sparkles mr-1"></i> 品種專屬指南</p>
-                                    <span class="text-[10px] bg-white/20 px-2 py-1 rounded-md font-bold backdrop-blur-sm">{rec.tag}</span>
+                        <div className={`relative overflow-hidden p-8 mb-8 ${rec.color}`}>
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-center mb-4">
+                                    <p className="text-sm font-black uppercase tracking-widest text-white/90 drop-shadow-sm"><i className="fa-solid fa-star mr-2 text-white"></i> 專屬被動技能</p>
+                                    <span className="text-[12px] bg-white/30 px-3 py-1.5 rounded-full font-black border-2 border-white/40 shadow-sm">{rec.tag}</span>
                                 </div>
-                                <p class="font-bold text-lg mb-1">{rec.name}</p>
-                                <p class="text-sm text-white/90 leading-relaxed">{rec.desc}</p>
+                                <p className="font-black text-3xl mb-3 drop-shadow-md">{rec.name}</p>
+                                <p className="text-[16px] font-extrabold text-white/95 leading-relaxed drop-shadow-sm">{rec.desc}</p>
                             </div>
-                            <i class={`fa-solid ${rec.icon} absolute -right-4 -bottom-4 text-7xl opacity-10 transform -rotate-12`}></i>
+                            <i className={`fa-solid ${rec.icon} absolute -right-6 -bottom-6 text-9xl text-white/20 transform -rotate-12`}></i>
                         </div>
 
                         {showWarning && (
-                            <div class="space-y-2 mb-6">
+                            <div className="space-y-4 mb-8">
+                                <h4 className="text-xl font-black text-slate-800 flex items-center gap-2"><i className="fa-solid fa-triangle-exclamation text-[#ff4b4b]"></i> 主線任務警報</h4>
                                 {pet.gender === '女' && pet.isNeutered === '未絕育' && (
-                                    <div class="bg-pink-50 border-l-4 border-pink-500 p-4 rounded-r-xl">
-                                        <p class="text-sm font-bold text-pink-700"><i class="fa-solid fa-heart mr-2"></i> 生理期預警：請留意情緒與清潔。</p>
+                                    <div className="bg-white border-2 border-[#ea1515] p-5 rounded-2xl flex items-center gap-5 shadow-[0_4px_0_#ea1515]">
+                                        <div className="w-12 h-12 rounded-full bg-[#ff4b4b] text-white flex items-center justify-center text-2xl shrink-0"><i className="fa-solid fa-heart"></i></div>
+                                        <p className="text-[16px] font-black text-slate-800">生理期預警，請留意情緒與清潔。</p>
                                     </div>
                                 )}
                                 {noPostToday && (
-                                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
-                                        <p class="text-sm font-bold text-amber-700"><i class="fa-regular fa-clock mr-2"></i> 今日尚未紀錄：去動態牆分享一下 {pet.name} 今天的狀況吧！</p>
+                                    <div className="bg-white border-2 border-[#c68900] p-5 rounded-2xl flex items-center gap-5 shadow-[0_4px_0_#c68900]">
+                                        <div className="w-12 h-12 rounded-full bg-[#ffc800] text-white flex items-center justify-center text-2xl shrink-0"><i className="fa-solid fa-camera"></i></div>
+                                        <p className="text-[16px] font-black text-slate-800">去動態牆分享 {pet.name} 今天的狀況！</p>
                                     </div>
                                 )}
                                 {urgentCount > 0 && (
-                                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
-                                        <p class="text-sm font-bold text-red-700"><i class="fa-solid fa-triangle-exclamation mr-2"></i> 待辦逾期：有 {urgentCount} 項任務需要盡快完成！</p>
+                                    <div className="bg-white border-2 border-[#ea1515] p-5 rounded-2xl flex items-center gap-5 shadow-[0_4px_0_#ea1515]">
+                                        <div className="w-12 h-12 rounded-full bg-[#ff4b4b] text-white flex items-center justify-center text-2xl shrink-0"><i className="fa-solid fa-clock"></i></div>
+                                        <p className="text-[16px] font-black text-slate-800">有 {urgentCount} 項排程任務已經逾期囉！</p>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        <div class="bg-gray-50/50 rounded-2xl p-5 border border-gray-100">
-                            <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center"><i class="fa-solid fa-list-check mr-2 text-indigo-500"></i> 日常代辦清單</h4>
+                        <div>
+                            <h4 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2"><i className="fa-solid fa-list-check text-[#1cb0f6]"></i> 支線任務 (代辦清單)</h4>
                             
-                            <div class="space-y-2 mb-4">
-                                {petReminders.length === 0 ? <p class="text-xs text-gray-400 text-center py-2">目前無待辦事項</p> : 
+                            <div className="space-y-4 mb-8">
+                                {petReminders.length === 0 ? <div className="duo-card p-8 text-center text-slate-400 font-black bg-slate-50 border-none text-lg">🎉 任務全數清空，太棒了！</div> : 
                                     petReminders.sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1)).map(r => {
                                         const urgent = !r.completed && isTodayOrOverdue(r.targetDate);
                                         return (
-                                            <div key={r.id} class={`bg-white p-3.5 rounded-xl shadow-sm border ${r.completed ? 'border-transparent opacity-60' : urgent ? 'border-red-200' : 'border-gray-100'} flex justify-between items-center transition-all`}>
-                                                <div class="flex items-center gap-3">
-                                                    <div class={`w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${r.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300 hover:border-indigo-400'}`} onClick={() => toggleCompleted(r.id)}>
-                                                        {r.completed && <i class="fa-solid fa-check text-white text-xs"></i>}
+                                            <div key={r.id} className={`p-5 rounded-2xl border-2 flex justify-between items-center transition-all shadow-[0_4px_0_rgba(0,0,0,0.05)] ${r.completed ? 'bg-slate-50 border-slate-200' : urgent ? 'bg-[#fff0f0] border-[#ff4b4b]' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
+                                                <div className="flex items-center gap-5">
+                                                    <div className={`w-10 h-10 rounded-full border-4 flex items-center justify-center cursor-pointer transition-colors ${r.completed ? 'bg-[#58cc02] border-[#58cc02]' : 'bg-white border-slate-300 hover:border-[#58cc02]'}`} onClick={() => toggleCompleted(r.id)}>
+                                                        {r.completed && <i className="fa-solid fa-check text-white text-lg"></i>}
                                                     </div>
                                                     <div>
-                                                        <p class={`text-sm font-bold ${r.completed ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{r.text}</p>
-                                                        <p class={`text-[10px] font-bold mt-0.5 ${urgent ? 'text-red-500' : 'text-gray-400'}`}><i class="fa-regular fa-calendar mr-1"></i> {r.targetDate}</p>
+                                                        <p className={`text-[18px] font-black ${r.completed ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{r.text}</p>
+                                                        <p className={`text-[14px] font-extrabold mt-1 ${urgent && !r.completed ? 'text-[#ff4b4b]' : 'text-slate-400'}`}><i className="fa-regular fa-calendar mr-1.5"></i> {r.targetDate}</p>
                                                     </div>
                                                 </div>
                                                 <button onClick={() => {
                                                     const updated = reminders.filter(item => item.id !== r.id);
                                                     setReminders(updated); onUpdateUser({...userData, customReminders: updated});
-                                                }} class="text-gray-300 hover:text-red-500 px-2 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                                                }} className="w-12 h-12 rounded-full duo-btn-white text-slate-400 hover:text-[#ff4b4b] !p-0 !border-b-4 flex justify-center items-center text-xl bg-slate-50"><i className="fa-solid fa-trash-can"></i></button>
                                             </div>
                                         )
                                     })
                                 }
                             </div>
 
-                            <div class="flex flex-col md:flex-row gap-2 mt-4 pt-4 border-t border-gray-200/60">
-                                <input type="text" class="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="例如：餵心絲蟲藥..." 
+                            <div className="flex flex-col md:flex-row gap-4 pt-8 border-t-2 border-slate-100">
+                                <input type="text" className="flex-1 duo-input p-4 text-[16px] bg-slate-50 shadow-inner" placeholder="輸入新任務 (如：點除蚤藥)" 
                                     value={newReminderData[pet.id]?.text || ''} onChange={e => setNewReminderData({...newReminderData, [pet.id]: { ...newReminderData[pet.id], text: e.target.value }})} />
-                                <div class="flex gap-2">
-                                    <input type="date" class="flex-1 md:w-36 bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" 
+                                <div className="flex gap-3">
+                                    <input type="date" className="flex-1 md:w-[150px] duo-input p-4 text-[16px] text-slate-600 bg-slate-50 font-black shadow-inner" 
                                         value={newReminderData[pet.id]?.date || ''} onChange={e => setNewReminderData({...newReminderData, [pet.id]: { ...newReminderData[pet.id], date: e.target.value }})} />
-                                    <button onClick={() => addReminder(pet.id)} class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-sm transition-colors whitespace-nowrap">新增</button>
+                                    <button onClick={() => addReminder(pet.id)} className="duo-btn-green px-8 py-4 font-black text-[16px] border-b-4 tracking-widest text-lg">新增</button>
                                 </div>
                             </div>
                         </div>
@@ -600,35 +570,21 @@
             );
         };
 
-        // --- AI 急診 ---
         const AIVetTab = ({ userData }) => {
-            const [messages, setMessages] = useState([{ sender: 'bot', text: `你好！我是急診助手。請問是哪一隻毛孩怎麼了？請描述症狀，必要時可上傳照片讓我幫您分析。` }]);
+            const [messages, setMessages] = useState([{ sender: 'bot', text: `你好！我是 AI 獸醫博士 🦉。是哪隻毛孩遇到困難了？請描述症狀，或上傳照片讓我診斷。` }]);
             const [input, setInput] = useState('');
             const [imageAttachment, setImageAttachment] = useState(null); 
             const [isTyping, setIsTyping] = useState(false);
-            const chatEndRef = useRef(null);
+            const chatContainerRef = useRef(null);
             const fileInputRef = useRef(null);
 
             const callGeminiAPI = async (userText, imageBase64) => {
                 const GEMINI_API_KEY = localStorage.getItem(DB_KEY_API_TOKEN);
-
-                if (!GEMINI_API_KEY) {
-                    return `⚠️ 【系統提示】：您尚未設定 API Key！\n\n因為專案開源在 GitHub，直接放入金鑰會有被盜用的風險。請點擊左側「管理設定」，在「AI 診斷引擎設定」中輸入您的 Gemini API Key 來解鎖真正的 AI 功能！`;
-                }
+                if (!GEMINI_API_KEY) return `⚠️ 您尚未裝備「AI 智慧核心 (API Key)」！\n\n請前往左側「管理設定」，填入您的 Gemini API Key 來解鎖真正的博士智慧！`;
 
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 const petsInfo = userData?.pets?.map(p => `- ${p.name} (${p.species}, ${p.breed}, ${p.gender}, ${p.isNeutered})`).join('\n') || '無詳細資料';
-
-                const promptText = `你是一位專業、親切且有同理心的獸醫急診助手。
-使用者擁有的毛孩檔案：
-${petsInfo}
-
-使用者諮詢描述：${userText || '（使用者未填寫文字，主要上傳了圖片）'}
-
-請遵循以下要求：
-1. 語氣專業、貼心且簡明扼要。
-2. ⚠️ 【安全護欄】：若從圖片或文字中發現嚴重症狀（如出血、劇烈嘔吐、昏迷、呼吸困難等），請在最開頭用【⚠️ 立即送醫提示】警示主人。
-3. 若有照片，請結合照片細節給出初步觀察建議。`;
+                const promptText = `你是一位講話像卡通人物、非常熱情但專業的 AI 獸醫博士（類似多鄰國的 Duo 貓頭鷹）。\n使用者的毛孩角色：\n${petsInfo}\n\n使用者諮詢描述：${userText || '（主要上傳了圖片）'}\n\n1. 語氣熱情、幽默，多用表情符號，但醫療建議必須嚴謹。\n2. ⚠️ 若發現嚴重症狀，請用【緊急任務】警示主人立即送醫。\n3. 若有照片，請認真觀察照片給出建議。`;
 
                 const parts = [];
                 if (imageBase64) {
@@ -639,95 +595,89 @@ ${petsInfo}
                 parts.push({ text: promptText });
 
                 try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts }] })
-                    });
+                    const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }] }) });
                     const data = await response.json();
-                    
-                    if (data.error) {
-                         return `❌ API 發生錯誤：${data.error.message}。\n請檢查您的 API Key 是否正確。`;
-                    }
-                    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-                        return data.candidates[0].content.parts[0].text;
-                    }
-                    return "AI 響應異常，請稍後再試。";
+                    if (data.error) return `❌ 系統錯誤：${data.error.message}。\n請檢查 Key 是否正確。`;
+                    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) return data.candidates[0].content.parts[0].text;
+                    return "博士現在有點暈頭轉向，請稍後再試。";
                 } catch (err) {
                     console.error("Gemini API Error:", err);
-                    return "連接 Gemini API 失敗，請檢查網路連線。";
+                    return "網路連線中斷了，博士接收不到訊號！";
                 }
             };
 
             const handleSend = async () => {
                 if (!input.trim() && !imageAttachment) return;
-                
-                const userText = input.trim();
-                const currentImg = imageAttachment;
-
-                setInput('');
-                setImageAttachment(null);
-
+                const userText = input.trim(); const currentImg = imageAttachment;
+                setInput(''); setImageAttachment(null);
                 const newMsgs = [...messages, { sender: 'user', text: userText, image: currentImg }];
-                setMessages(newMsgs);
-                setIsTyping(true);
+                setMessages(newMsgs); setIsTyping(true);
 
                 const botReply = await callGeminiAPI(userText, currentImg);
-                
-                setIsTyping(false);
-                setMessages([...newMsgs, { sender: 'bot', text: botReply }]);
+                setIsTyping(false); setMessages([...newMsgs, { sender: 'bot', text: botReply }]);
             };
 
-            useEffect(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages, isTyping]);
+            useEffect(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' });
+                }
+            }, [messages, isTyping]);
 
             return (
-                <div class="flex flex-col h-full bg-white pb-[70px] md:pb-0 relative">
-                    <div class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-5 shadow-md z-10 shrink-0">
-                        <h2 class="text-lg font-bold flex items-center"><i class="fa-solid fa-stethoscope mr-2 text-2xl"></i> AI 急診室</h2>
-                        <p class="text-xs text-indigo-100 mt-1">請在設定中輸入 Gemini API Key 以啟用完整影像識別功能</p>
+                <div className="flex flex-col h-full w-full bg-polka-dots">
+                    <div className="bg-white/90 backdrop-blur-md border-b-2 border-slate-200 p-4 md:p-6 shrink-0 w-full z-20 shadow-sm">
+                        <div className="flex items-center max-w-4xl mx-auto w-full">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#ffc800] text-white flex items-center justify-center text-2xl md:text-3xl border-b-4 border-[#c68900] mr-4 md:mr-5 shadow-sm shrink-0"><i className="fa-solid fa-user-doctor"></i></div>
+                            <div className="overflow-hidden">
+                                <h2 className="text-xl md:text-2xl font-black text-slate-800 truncate">AI 博士</h2>
+                                <p className="text-xs md:text-[14px] text-slate-400 font-extrabold mt-1 truncate">已載入您的毛孩角色檔案</p>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
-                        {messages.map((msg, idx) => (
-                            <div key={idx} class={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div class={`max-w-[85%] p-4 rounded-2xl text-[15px] whitespace-pre-wrap shadow-sm leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'}`}>
-                                    {msg.image && <img src={msg.image} class="w-full max-w-[280px] h-auto object-contain rounded-xl mb-3 shadow-sm bg-black/5" />}
-                                    {msg.text}
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 w-full" ref={chatContainerRef}>
+                        <div className="max-w-4xl mx-auto w-full space-y-6 md:space-y-8">
+                            {messages.map((msg, idx) => (
+                                <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    {msg.sender === 'bot' && idx > 0 && <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#ffc800] text-white flex items-center justify-center text-xl md:text-2xl mr-3 md:mr-4 mt-auto shrink-0 border-b-4 border-[#c68900] shadow-sm"><i className="fa-solid fa-user-doctor"></i></div>}
+                                    <div className={`max-w-[85%] md:max-w-[75%] p-4 md:p-5 text-[15px] md:text-[16px] whitespace-pre-wrap font-black leading-relaxed border-2 ${msg.sender === 'user' ? 'bg-[#1cb0f6] text-white border-[#1cb0f6] rounded-[1.5rem] rounded-br-md shadow-[0_6px_0_#1899d6]' : 'bg-white text-slate-700 border-slate-200 rounded-[1.5rem] rounded-bl-md shadow-[0_6px_0_#e2e8f0]'}`}>
+                                        {msg.image && <img src={msg.image} className="w-full max-w-[280px] h-auto object-contain rounded-xl mb-4 border-2 border-black/10 bg-white shadow-sm" />}
+                                        {msg.text}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {isTyping && (
-                            <div class="flex justify-start"><div class="bg-white border border-gray-100 p-4 rounded-2xl rounded-bl-none shadow-sm flex gap-1.5"><svg height="8" width="8" class="typing-dot text-gray-400"><circle cx="4" cy="4" r="4"/></svg><svg height="8" width="8" class="typing-dot text-gray-400"><circle cx="4" cy="4" r="4"/></svg><svg height="8" width="8" class="typing-dot text-gray-400"><circle cx="4" cy="4" r="4"/></svg></div></div>
-                        )}
-                        <div ref={chatEndRef} class="h-2"></div>
+                            ))}
+                            {isTyping && (
+                                <div className="flex justify-start">
+                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#ffc800] text-white flex items-center justify-center text-xl md:text-2xl mr-3 md:mr-4 mt-auto shrink-0 border-b-4 border-[#c68900] shadow-sm"><i className="fa-solid fa-user-doctor"></i></div>
+                                    <div className="bg-white border-2 border-slate-200 p-4 md:p-5 rounded-[1.5rem] rounded-bl-md shadow-[0_6px_0_#e2e8f0] flex gap-2 items-center"><svg height="10" width="10" className="typing-dot"><circle cx="5" cy="5" r="5"/></svg><svg height="10" width="10" className="typing-dot"><circle cx="5" cy="5" r="5"/></svg><svg height="10" width="10" className="typing-dot"><circle cx="5" cy="5" r="5"/></svg></div>
+                                </div>
+                            )}
+                            <div className="h-2"></div>
+                        </div>
                     </div>
 
-                    <div class="p-4 bg-white border-t border-gray-100 flex flex-col gap-2 shrink-0 z-10 absolute md:relative bottom-0 w-full">
-                        {imageAttachment && (
-                            <div class="relative inline-block w-24 h-24 mb-1">
-                                <img src={imageAttachment} class="w-24 h-24 object-cover rounded-xl border-2 border-indigo-200 shadow-sm" />
-                                <button onClick={() => setImageAttachment(null)} class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-xmark"></i></button>
+                    <div className="p-4 md:p-5 bg-white/90 backdrop-blur-md border-t-2 border-slate-200 shrink-0 w-full z-20 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] pb-safe">
+                        <div className="max-w-4xl mx-auto w-full">
+                            {imageAttachment && (
+                                <div className="relative inline-block w-20 h-20 md:w-24 md:h-24 mb-3">
+                                    <img src={imageAttachment} className="w-full h-full object-cover rounded-xl border-2 border-slate-200 shadow-sm" />
+                                    <button onClick={() => setImageAttachment(null)} className="absolute -top-3 -right-3 duo-btn-red w-8 h-8 flex items-center justify-center text-sm !p-0 !border-b-4"><i className="fa-solid fa-xmark"></i></button>
+                                </div>
+                            )}
+                            <div className="flex gap-3 md:gap-4 items-center w-full">
+                                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={e => {
+                                    if(e.target.files[0]) { const reader = new FileReader(); reader.onloadend = () => setImageAttachment(reader.result); reader.readAsDataURL(e.target.files[0]); }
+                                }} />
+                                <button onClick={() => fileInputRef.current.click()} className="duo-btn-white w-12 h-12 md:w-14 md:h-14 flex items-center justify-center text-2xl text-[#1cb0f6] !p-0 !border-b-[6px] shrink-0 bg-slate-50"><i className="fa-solid fa-camera"></i></button>
+                                <input type="text" className="flex-1 duo-input p-3.5 md:p-4 text-[15px] md:text-[16px] bg-slate-50 shadow-inner" placeholder="輸入訊息..." value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSend()} disabled={isTyping} />
+                                <button onClick={handleSend} disabled={isTyping || (!input.trim() && !imageAttachment)} className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center text-2xl shrink-0 !p-0 !border-b-[6px] ${(!input.trim() && !imageAttachment) || isTyping ? 'duo-btn-white text-slate-300 cursor-not-allowed bg-slate-50' : 'duo-btn-blue'}`}><i className="fa-solid fa-paper-plane"></i></button>
                             </div>
-                        )}
-                        
-                        <div class="flex gap-3 items-center w-full">
-                            <input type="file" accept="image/*" class="hidden" ref={fileInputRef} onChange={e => {
-                                if(e.target.files[0]) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => setImageAttachment(reader.result);
-                                    reader.readAsDataURL(e.target.files[0]);
-                                }
-                            }} />
-                            <button onClick={() => fileInputRef.current.click()} class="text-gray-400 hover:text-indigo-600 p-2 text-2xl transition-colors"><i class="fa-solid fa-circle-plus"></i></button>
-                            <input type="text" class="flex-1 bg-gray-100 border-none rounded-full px-5 py-3.5 text-sm outline-none focus:ring-2 focus:ring-indigo-300 transition-shadow" placeholder="描述症狀..." value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSend()} disabled={isTyping} />
-                            <button onClick={handleSend} disabled={isTyping || (!input.trim() && !imageAttachment)} class={`w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-lg transition-transform ${(!input.trim() && !imageAttachment) || isTyping ? 'bg-gray-200 text-gray-400' : 'bg-indigo-600 text-white hover:scale-105'}`}><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- 核心架構 ---
         const App = () => {
             const [currentUser, setCurrentUser] = useState(localStorage.getItem(DB_KEY_CURRENT_USER));
             const [userData, setUserData] = useState(null); 
@@ -754,8 +704,27 @@ ${petsInfo}
 
             const handleUpdateUser = (newData) => {
                 const usersDb = JSON.parse(localStorage.getItem(DB_KEY_USERS)) || {};
-                usersDb[currentUser] = newData; localStorage.setItem(DB_KEY_USERS, JSON.stringify(usersDb));
+                const oldName = userData?.name;
+                const oldAvatar = userData?.avatar;
+                
+                usersDb[currentUser] = newData; 
+                localStorage.setItem(DB_KEY_USERS, JSON.stringify(usersDb));
                 setUserData(newData);
+
+                if ((oldName && oldName !== newData.name) || (oldAvatar && oldAvatar !== newData.avatar)) {
+                    const savedPosts = JSON.parse(localStorage.getItem(DB_KEY_POSTS)) || posts;
+                    const updatedPosts = savedPosts.map(p => {
+                        let pCopy = { ...p };
+                        if (pCopy.author === oldName) {
+                            pCopy.author = newData.name;
+                            if (oldAvatar !== newData.avatar) pCopy.avatar = newData.avatar;
+                        }
+                        pCopy.comments = pCopy.comments.map(c => c.author === oldName ? { ...c, author: newData.name } : c);
+                        return pCopy;
+                    });
+                    setPosts(updatedPosts);
+                    localStorage.setItem(DB_KEY_POSTS, JSON.stringify(updatedPosts));
+                }
             };
 
             const handleLogout = () => { localStorage.removeItem(DB_KEY_CURRENT_USER); setCurrentUser(null); setUserData(null); };
@@ -769,55 +738,58 @@ ${petsInfo}
             }
 
             return (
-                <div class="flex h-full w-full bg-[#f8fafc] overflow-hidden relative">
-                    
-                    {/* 左側 Sidebar (電腦版) */}
-                    <div class="hidden md:flex flex-col w-[280px] bg-white border-r border-gray-100 z-10 h-full">
-                        <div class="p-8">
-                            <div class="flex items-center gap-4 mb-8">
-                                <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-indigo-50 bg-gray-50 flex-shrink-0">{renderAvatar(userData.avatar)}</div>
-                                <div class="overflow-hidden">
-                                    <p class="font-extrabold text-lg text-gray-900 truncate">{userData.name}</p>
-                                    <p class="text-[11px] text-gray-400 font-medium mt-0.5 truncate">{currentUser}</p>
+                <div className="flex h-screen w-full bg-polka-dots overflow-hidden relative">
+                    {/* 🌟 左側 Sidebar：增強的陰影對比與高度固定 */}
+                    <div className="hidden md:flex flex-col w-[320px] bg-gradient-to-br from-[#ffe066] to-[#fff2a8] border-r-2 border-[#e5e5e5] z-20 h-screen relative shadow-[8px_0_30px_rgba(0,0,0,0.08)]">
+                        <div className="flex-1 overflow-y-auto p-5 min-h-0">
+                            
+                            {/* 🧊 裝飾：毛玻璃質感個人資料卡片 */}
+                            <div className="flex items-center gap-4 mb-6 py-3 px-4 rounded-2xl bg-white/40 backdrop-blur-md border-2 border-white/60 shadow-sm relative overflow-hidden">
+                                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white bg-slate-50 flex-shrink-0 shadow-sm">{renderAvatar(userData.avatar)}</div>
+                                <div className="overflow-hidden relative z-10">
+                                    <p className="font-black text-xl text-slate-800 truncate">{userData.name}</p>
+                                    <p className="text-[13px] text-slate-600 font-extrabold mt-1 truncate">{currentUser}</p>
                                 </div>
                             </div>
                             
-                            <div class="space-y-2 mb-8">
-                                <button onClick={() => setActiveTab('home')} class={`w-full text-left p-4 rounded-2xl font-bold flex items-center gap-4 transition-all ${activeTab==='home'?'bg-indigo-600 text-white shadow-md':'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}><i class="fa-solid fa-house text-lg w-6"></i> 動態牆</button>
-                                <button onClick={() => setActiveTab('reminders')} class={`w-full text-left p-4 rounded-2xl font-bold flex items-center gap-4 transition-all ${activeTab==='reminders'?'bg-indigo-600 text-white shadow-md':'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}><i class="fa-solid fa-heart-pulse text-lg w-6"></i> 健康與提醒</button>
-                                <button onClick={() => setActiveTab('aivet')} class={`w-full text-left p-4 rounded-2xl font-bold flex items-center gap-4 transition-all ${activeTab==='aivet'?'bg-indigo-600 text-white shadow-md':'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}><i class="fa-solid fa-stethoscope text-lg w-6"></i> AI 急診</button>
-                            </div>
-
-                            <div class="pt-6 border-t border-gray-100 space-y-3">
-                                <button onClick={() => setShowSettings(true)} class="w-full py-3 bg-gray-50 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors text-sm flex justify-center items-center"><i class="fa-solid fa-gear mr-2"></i> 管理設定</button>
+                            <div className="space-y-3 mb-4">
+                                {/* 🎨 裝飾：未選中按鈕顏色加深為 text-slate-700 */}
+                                <button onClick={() => setActiveTab('home')} className={`w-full text-left p-4 font-black flex items-center gap-4 text-[17px] transition-all group ${activeTab==='home'?'duo-btn-white active-tab':'text-slate-700 hover:bg-white/60 rounded-[1.25rem] border-2 border-transparent'}`}>
+                                    <i className={`fa-solid fa-house text-xl w-8 text-center group-hover:text-[#1cb0f6] ${activeTab==='home'?'animate-wiggle text-[#1cb0f6]':''}`}></i> 動態村
+                                </button>
+                                <button onClick={() => setActiveTab('reminders')} className={`w-full text-left p-4 font-black flex items-center gap-4 text-[17px] transition-all group ${activeTab==='reminders'?'duo-btn-white active-tab':'text-slate-700 hover:bg-white/60 rounded-[1.25rem] border-2 border-transparent'}`}>
+                                    <i className={`fa-solid fa-list-check text-xl w-8 text-center group-hover:text-[#1cb0f6] ${activeTab==='reminders'?'animate-wiggle text-[#1cb0f6]':''}`}></i> 每日任務
+                                </button>
+                                <button onClick={() => setActiveTab('aivet')} className={`w-full text-left p-4 font-black flex items-center gap-4 text-[17px] transition-all group ${activeTab==='aivet'?'duo-btn-white active-tab':'text-slate-700 hover:bg-white/60 rounded-[1.25rem] border-2 border-transparent'}`}>
+                                    <i className={`fa-solid fa-user-doctor text-xl w-8 text-center group-hover:text-[#1cb0f6] ${activeTab==='aivet'?'animate-wiggle text-[#1cb0f6]':''}`}></i> AI 博士
+                                </button>
                             </div>
                         </div>
-                        <div class="mt-auto p-6">
-                            <button onClick={handleLogout} class="w-full py-3 text-red-500 font-bold rounded-xl hover:bg-red-50 transition-colors text-sm"><i class="fa-solid fa-right-from-bracket mr-2"></i> 登出</button>
+                        <div className="shrink-0 p-5 border-t-2 border-white/40 space-y-3">
+                            <button onClick={() => setShowSettings(true)} className="w-full duo-btn-white py-3 font-black text-[15px] border-b-[6px] flex items-center justify-center text-slate-700 bg-white/90 hover:bg-white"><i className="fa-solid fa-gear mr-2 text-lg"></i> 管理設定</button>
+                            <button onClick={handleLogout} className="w-full duo-btn-white py-3 text-[#ff4b4b] font-black text-[15px] border-b-[6px] flex items-center justify-center bg-white/90 hover:bg-white"><i className="fa-solid fa-right-from-bracket mr-2 text-lg"></i> 登出</button>
                         </div>
                     </div>
 
                     {/* 右側主內容區 */}
-                    <div class="flex-1 flex flex-col relative w-full h-full overflow-hidden">
-                        
-                        {/* 手機版頂部 */}
-                        <div class="md:hidden h-16 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 border-b border-gray-100 shrink-0 z-20">
-                            <div class="font-extrabold text-lg text-indigo-600 tracking-tight flex items-center gap-2"><i class="fa-solid fa-paw"></i> 寵物每一天</div>
-                            <button onClick={() => setShowSettings(true)} class="w-8 h-8 rounded-full overflow-hidden border border-gray-200">{renderAvatar(userData.avatar)}</button>
+                    <div className="flex-1 flex flex-col relative w-full h-screen overflow-hidden bg-polka-dots">
+                        <div className="md:hidden h-[80px] bg-white/90 backdrop-blur-md flex items-center justify-between px-6 border-b-2 border-slate-200 shrink-0 z-20 pt-safe shadow-sm">
+                            <div className="font-black text-3xl text-[#58cc02] tracking-tight flex items-center gap-3 drop-shadow-sm"><i className="fa-solid fa-paw"></i> 寵物村</div>
+                            <div className="flex items-center gap-5">
+                                <button onClick={() => setShowSettings(true)} className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-200 bg-slate-50 shadow-sm">{renderAvatar(userData.avatar)}</button>
+                            </div>
                         </div>
-
-                        {/* 主要渲染區域 */}
-                        <div class="flex-1 overflow-hidden relative">
+                        
+                        <div className="flex-1 overflow-hidden relative">
                             {activeTab === 'home' && <HomeTab userData={userData} posts={posts} setPosts={setPosts} />}
                             {activeTab === 'reminders' && <CareDashboardTab userData={userData} onUpdateUser={handleUpdateUser} posts={posts} />}
                             {activeTab === 'aivet' && <AIVetTab userData={userData} />}
                         </div>
 
-                        {/* 手機版底部導航 */}
-                        <div class="md:hidden absolute bottom-0 w-full h-[80px] pb-safe bg-white border-t border-gray-100 flex justify-around items-center text-xs text-gray-400 z-20">
-                            <button onClick={() => setActiveTab('home')} class={`flex flex-col items-center justify-center w-full h-full transition-colors ${activeTab === 'home' ? 'text-indigo-600 font-bold' : 'hover:text-gray-600'}`}><i class={`fa-solid fa-house text-xl mb-1.5 ${activeTab==='home'?'mb-2 scale-110 transition-transform':''}`}></i>動態</button>
-                            <button onClick={() => setActiveTab('reminders')} class={`flex flex-col items-center justify-center w-full h-full transition-colors ${activeTab === 'reminders' ? 'text-indigo-600 font-bold' : 'hover:text-gray-600'}`}><i class={`fa-solid fa-heart-pulse text-xl mb-1.5 ${activeTab==='reminders'?'mb-2 scale-110 transition-transform':''}`}></i>健康與提醒</button>
-                            <button onClick={() => setActiveTab('aivet')} class={`flex flex-col items-center justify-center w-full h-full transition-colors ${activeTab === 'aivet' ? 'text-indigo-600 font-bold' : 'hover:text-gray-600'}`}><i class={`fa-solid fa-stethoscope text-xl mb-1.5 ${activeTab==='aivet'?'mb-2 scale-110 transition-transform':''}`}></i>急診</button>
+                        <div className="md:hidden absolute bottom-0 w-full h-[90px] pb-safe bg-white/95 backdrop-blur-md border-t-2 border-slate-200 flex justify-around items-center text-xs text-slate-400 z-20">
+                            <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center justify-center w-full h-full transition-all ${activeTab === 'home' ? 'text-[#1cb0f6] font-black' : 'font-extrabold'}`}><i className={`fa-solid fa-house text-[28px] mb-1.5 ${activeTab==='home'?'mb-2 bg-[#ddf4ff] p-2 rounded-xl border-2 border-[#1cb0f6] text-[#1cb0f6] animate-wiggle':''}`}></i>{activeTab!=='home' && '動態'}</button>
+                            <button onClick={() => setActiveTab('reminders')} className={`flex flex-col items-center justify-center w-full h-full transition-all ${activeTab === 'reminders' ? 'text-[#1cb0f6] font-black' : 'font-extrabold'}`}><i className={`fa-solid fa-list-check text-[28px] mb-1.5 ${activeTab==='reminders'?'mb-2 bg-[#ddf4ff] p-2 rounded-xl border-2 border-[#1cb0f6] text-[#1cb0f6] animate-wiggle':''}`}></i>{activeTab!=='reminders' && '任務'}</button>
+                            <button onClick={() => setActiveTab('aivet')} className={`flex flex-col items-center justify-center w-full h-full transition-all ${activeTab === 'aivet' ? 'text-[#1cb0f6] font-black' : 'font-extrabold'}`}><i className={`fa-solid fa-user-doctor text-[28px] mb-1.5 ${activeTab==='aivet'?'mb-2 bg-[#ddf4ff] p-2 rounded-xl border-2 border-[#1cb0f6] text-[#1cb0f6] animate-wiggle':''}`}></i>{activeTab!=='aivet' && '博士'}</button>
                         </div>
                     </div>
 
