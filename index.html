@@ -2,8 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>寵物每一天</title>
+    <!-- 💡 手机端修复 1：加入 viewport-fit=cover 适配刘海屏，并锁定禁止屏幕乱缩放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>寵物每一天 - 遊戲化升級版</title>
     <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -13,9 +14,18 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 🌟 嚴格鎖死外層，防止瀏覽器霸道滾動 */
-        html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; position: fixed; touch-action: none; background-color: #f0f4f8; color: #334155; font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; }
+        /* 💡 手机端修复 2：使用 100dvh (动态视口高度) 彻底解决 URL Bar 遮挡问题 */
+        html, body { 
+            height: 100dvh; width: 100%; margin: 0; padding: 0; 
+            overflow: hidden; position: fixed; touch-action: none; 
+            background-color: #f0f4f8; color: #334155; 
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; 
+        }
         ::-webkit-scrollbar { display: none; }
+        
+        /* 💡 手机端修复 3：添加 iPhone 刘海屏与底部黑线的「安全区 (Safe Area)」Padding */
+        .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+        .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
         
         /* 🍄 裝飾：右側遊樂園波點背景 */
         .bg-polka-dots {
@@ -62,11 +72,11 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const DB_KEY_USERS = 'petApp_v12_users'; 
-        const DB_KEY_POSTS = 'petApp_v12_posts'; 
-        const DB_KEY_AUTH = 'petApp_v12_auth';   
-        const DB_KEY_CURRENT_USER = 'petApp_v12_currentUser'; 
-        const DB_KEY_API_TOKEN = 'petApp_v12_geminiToken';
+        const DB_KEY_USERS = 'petApp_v13_users'; 
+        const DB_KEY_POSTS = 'petApp_v13_posts'; 
+        const DB_KEY_AUTH = 'petApp_v13_auth';   
+        const DB_KEY_CURRENT_USER = 'petApp_v13_currentUser'; 
+        const DB_KEY_API_TOKEN = 'petApp_v13_geminiToken';
 
         const defaultPosts = [
             { id: 2, author: 'LeoMom', avatar: '👩', petName: 'Leo', time: '1 小時前', timestamp: Date.now() - 3600000, content: '今天天氣超好，帶 Leo 去了寵物公園，結果牠交到了新朋友！跑了一下午回家直接秒睡 🤣', image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80', likes: 12, likedByMe: false, comments: [{id: 1, author: '王大明', text: '太可愛了吧！'}] },
@@ -108,9 +118,8 @@
             };
 
             return (
-                /* 💡 終極滾動修復：absolute 鋪滿並使用 flex-col 搭配 m-auto，完美解決超出螢幕無法滾動的問題 */
                 <div className="absolute inset-0 overflow-y-auto flex flex-col bg-gradient-to-br from-[#ffe066] to-[#f0f4f8]">
-                    <div className="m-auto w-full max-w-md p-6 py-12 flex flex-col items-center justify-center">
+                    <div className="m-auto w-full max-w-md p-6 py-12 flex flex-col items-center justify-center pt-safe pb-safe">
                         <div className="text-center w-full mb-10">
                             <div className="text-6xl mb-6 text-[#58cc02] w-28 h-28 mx-auto duo-card flex items-center justify-center bg-white"><i className="fa-solid fa-paw"></i></div>
                             <h1 className="text-5xl font-black text-slate-800 tracking-tight drop-shadow-sm">寵物每一天</h1>
@@ -130,7 +139,11 @@
         };
 
         const PetForm = ({ initialData, onSave, onCancel, title }) => {
-            const [formData, setFormData] = useState(initialData || { id: Date.now(), name: '', species: '狗', breed: speciesOptions['狗'][0], customBreed: '', gender: '男', isNeutered: '未絕育', status: '活潑健康' });
+            const [formData, setFormData] = useState(initialData || { 
+                id: Date.now(), name: '', species: '狗', breed: speciesOptions['狗'][0], customBreed: '', 
+                gender: '男', isNeutered: '未絕育', status: '活潑健康',
+                age: '', weight: '', height: '', length: '' 
+            });
             const submit = () => {
                 if (!formData.name.trim()) return alert('請填寫寵物名字！');
                 const finalBreed = formData.breed.includes('其他') ? formData.customBreed : formData.breed;
@@ -143,25 +156,36 @@
                     <div className="space-y-5">
                         <div>
                             <label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">名字</label>
-                            <input type="text" className="w-full duo-input p-4" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：毛毛" />
+                            <input type="text" className="w-full duo-input p-4 text-[16px]" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：毛毛" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">物種</label>
-                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.species} onChange={e => setFormData({...formData, species: e.target.value, breed: speciesOptions[e.target.value][0], customBreed: ''})}>{Object.keys(speciesOptions).map(s => <option key={s} value={s}>{s}</option>)}</select>
+                                <select className="w-full duo-input p-4 cursor-pointer text-[16px]" value={formData.species} onChange={e => setFormData({...formData, species: e.target.value, breed: speciesOptions[e.target.value][0], customBreed: ''})}>{Object.keys(speciesOptions).map(s => <option key={s} value={s}>{s}</option>)}</select>
                             </div>
                             <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">品種</label>
-                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.breed} onChange={e => setFormData({...formData, breed: e.target.value})}>{speciesOptions[formData.species].map(b => <option key={b} value={b}>{b}</option>)}</select>
+                                <select className="w-full duo-input p-4 cursor-pointer text-[16px]" value={formData.breed} onChange={e => setFormData({...formData, breed: e.target.value})}>{speciesOptions[formData.species].map(b => <option key={b} value={b}>{b}</option>)}</select>
                             </div>
                         </div>
-                        {formData.breed.includes('其他') && <input type="text" className="w-full duo-input p-4" value={formData.customBreed} onChange={e => setFormData({...formData, customBreed: e.target.value})} placeholder="請輸入品種" />}
+                        {formData.breed.includes('其他') && <input type="text" className="w-full duo-input p-4 text-[16px]" value={formData.customBreed} onChange={e => setFormData({...formData, customBreed: e.target.value})} placeholder="請輸入品種" />}
                         <div className="grid grid-cols-2 gap-4">
                             <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">性別</label>
-                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}><option value="男">男生</option><option value="女">女生</option></select>
+                                <select className="w-full duo-input p-4 cursor-pointer text-[16px]" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}><option value="男">男生</option><option value="女">女生</option></select>
                             </div>
                             <div><label className="block text-sm font-extrabold text-slate-400 mb-2 uppercase tracking-wide">絕育狀態</label>
-                                <select className="w-full duo-input p-4 cursor-pointer" value={formData.isNeutered} onChange={e => setFormData({...formData, isNeutered: e.target.value})}><option value="未絕育">未絕育</option><option value="已絕育">已絕育</option></select>
+                                <select className="w-full duo-input p-4 cursor-pointer text-[16px]" value={formData.isNeutered} onChange={e => setFormData({...formData, isNeutered: e.target.value})}><option value="未絕育">未絕育</option><option value="已絕育">已絕育</option></select>
                             </div>
                         </div>
+
+                        <div className="pt-4 border-t-2 border-slate-100">
+                            <label className="block text-sm font-extrabold text-[#1cb0f6] mb-4 uppercase tracking-wide"><i className="fa-solid fa-ruler"></i> 精準體態數據 (選填)</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><input type="number" step="0.1" className="w-full duo-input p-4 text-[15px]" value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} placeholder="年齡 (歲)" /></div>
+                                <div><input type="number" step="0.1" className="w-full duo-input p-4 text-[15px]" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} placeholder="體重 (kg)" /></div>
+                                <div><input type="number" step="0.1" className="w-full duo-input p-4 text-[15px]" value={formData.height} onChange={e => setFormData({...formData, height: e.target.value})} placeholder="身高 (cm)" /></div>
+                                <div><input type="number" step="0.1" className="w-full duo-input p-4 text-[15px]" value={formData.length} onChange={e => setFormData({...formData, length: e.target.value})} placeholder="體長 (cm)" /></div>
+                            </div>
+                        </div>
+
                         <div className="pt-6 flex flex-col md:flex-row gap-4">
                             {onCancel && <button onClick={onCancel} className="w-full duo-btn-white py-4 font-extrabold text-lg">取消</button>}
                             <button onClick={submit} className="w-full duo-btn-green py-4 font-extrabold text-lg tracking-wider">確認完成</button>
@@ -178,9 +202,8 @@
             const handleSavePet = (petData) => { setPets([...pets, petData]); setIsAdding(false); };
 
             if (isAdding) return (
-                /* 💡 同步修復：註冊寵物的畫面如果超出高度也可以完美滾動了 */
                 <div className="absolute inset-0 overflow-y-auto flex flex-col bg-[#f0f4f8]">
-                    <div className="m-auto w-full p-4 flex justify-center">
+                    <div className="m-auto w-full p-4 flex justify-center pt-safe pb-safe">
                         <PetForm key={pets.length} title={pets.length === 0 ? "建立第一隻寵物角色" : "新增其他寵物角色"} onSave={handleSavePet} onCancel={pets.length > 0 ? () => setIsAdding(false) : null} />
                     </div>
                 </div>
@@ -188,7 +211,7 @@
 
             return (
                 <div className="absolute inset-0 overflow-y-auto flex flex-col bg-[#f0f4f8]">
-                    <div className="m-auto w-full max-w-md p-4">
+                    <div className="m-auto w-full max-w-md p-4 pt-safe pb-safe">
                         <div className="duo-card p-10 w-full text-center bg-white">
                             <div className="w-28 h-28 bg-[#58cc02] text-white rounded-full flex items-center justify-center text-6xl mx-auto mb-8 border-b-8 border-[#58a700]"><i className="fa-solid fa-check"></i></div>
                             <h2 className="text-4xl font-black mb-4 text-slate-800">太棒了！</h2>
@@ -226,13 +249,13 @@
 
             const handleSave = () => { onUpdateUser({ ...userData, name, avatar }); localStorage.setItem(DB_KEY_API_TOKEN, apiKey); onClose(); };
 
-            if (editingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><PetForm initialData={editingPet} title="編輯角色資料" onSave={(updatedPet) => { onUpdateUser({ ...userData, pets: userData.pets.map(p => p.id === updatedPet.id ? updatedPet : p) }); setEditingPet(null); }} onCancel={() => setEditingPet(null)} /></div>;
-            if (isCreatingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><PetForm title="解鎖新角色" onSave={(newPet) => { onUpdateUser({ ...userData, pets: [...userData.pets, newPet] }); setIsCreatingPet(false); }} onCancel={() => setIsCreatingPet(false)} /></div>;
+            if (editingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm pt-safe pb-safe"><PetForm initialData={editingPet} title="編輯角色資料" onSave={(updatedPet) => { onUpdateUser({ ...userData, pets: userData.pets.map(p => p.id === updatedPet.id ? updatedPet : p) }); setEditingPet(null); }} onCancel={() => setEditingPet(null)} /></div>;
+            if (isCreatingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm pt-safe pb-safe"><PetForm title="解鎖新角色" onSave={(newPet) => { onUpdateUser({ ...userData, pets: [...userData.pets, newPet] }); setIsCreatingPet(false); }} onCancel={() => setIsCreatingPet(false)} /></div>;
 
             return (
-                <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
-                    <div className="bg-[#f8fafc] w-full max-w-lg rounded-3xl overflow-hidden flex flex-col max-h-[95vh] border-4 border-white shadow-2xl">
-                        <div className="p-6 flex justify-between items-center border-b-2 border-slate-200 bg-white">
+                <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm pt-safe pb-safe">
+                    <div className="bg-[#f8fafc] w-full max-w-lg rounded-3xl overflow-hidden flex flex-col max-h-[90dvh] border-4 border-white shadow-2xl">
+                        <div className="p-6 flex justify-between items-center border-b-2 border-slate-200 bg-white shrink-0">
                             <h3 className="font-black text-2xl text-slate-800">玩家與系統設定</h3>
                             <button onClick={onClose} className="text-slate-400 hover:text-[#ff4b4b] w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center font-bold transition-colors text-lg"><i className="fa-solid fa-xmark"></i></button>
                         </div>
@@ -275,7 +298,7 @@
                                 <button onClick={() => setIsCreatingPet(true)} className="w-full duo-btn-white py-4 text-[#58cc02] font-black text-lg border-b-4 bg-white mt-2"><i className="fa-solid fa-plus mr-2"></i> 招募新角色</button>
                             </div>
                         </div>
-                        <div className="p-6 border-t-2 border-slate-200 bg-white">
+                        <div className="p-6 border-t-2 border-slate-200 bg-white shrink-0">
                             <button onClick={handleSave} className="w-full duo-btn-green py-4 font-black text-xl tracking-wider">儲存設定</button>
                         </div>
                     </div>
@@ -332,8 +355,8 @@
             };
 
             return (
-                <div className="p-4 md:p-8 overflow-y-auto h-full pb-24 md:pb-8 max-w-4xl mx-auto w-full">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="p-4 md:p-8 overflow-y-auto h-full pb-32 md:pb-8 max-w-4xl mx-auto w-full">
+                    <div className="flex justify-between items-center mb-6 pt-safe">
                         <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3"><span className="text-4xl">🏕️</span> 動態村</h2>
                     </div>
                     
@@ -347,7 +370,7 @@
                                 </select>
                             </div>
                         </div>
-                        <textarea className="w-full duo-input p-5 mb-4 resize-none min-h-[100px] text-lg placeholder-slate-400 bg-slate-50 shadow-inner" placeholder="今天有什麼好玩的？🦴" value={inputText} onChange={e => setInputText(e.target.value)}></textarea>
+                        <textarea className="w-full duo-input p-5 mb-4 resize-none min-h-[100px] text-[16px] placeholder-slate-400 bg-slate-50 shadow-inner" placeholder="今天有什麼好玩的？🦴" value={inputText} onChange={e => setInputText(e.target.value)}></textarea>
                         
                         {imagePreview && (
                             <div className="relative inline-block w-full mb-4">
@@ -411,7 +434,7 @@
                                         ))}
                                         {commentingOn === post.id && (
                                             <div className="flex gap-3 mt-5 pt-5 border-t-2 border-slate-200">
-                                                <input type="text" className="flex-1 duo-input p-3.5 text-[15px] bg-white shadow-sm" placeholder={`回覆 ${post.author}...`} value={commentTexts[post.id] || ''} onChange={e => setCommentTexts({...commentTexts, [post.id]: e.target.value})} onKeyPress={e => e.key === 'Enter' && submitComment(post.id)} autoFocus />
+                                                <input type="text" className="flex-1 duo-input p-3.5 text-[15px] bg-white shadow-sm" placeholder={`回覆 ${post.author}...`} value={commentTexts[post.id] || ''} onChange={e => setCommentTexts({...commentTexts, [post.id]: e.target.value})} onKeyPress={e => e.key === 'Enter' && submitComment(post.id)} />
                                                 <button onClick={() => submitComment(post.id)} className="duo-btn-blue px-6 font-black text-[15px] border-b-4">回覆</button>
                                             </div>
                                         )}
@@ -433,6 +456,11 @@
 
             const getBreedRecommendation = (pet) => {
                 const b = pet.breed || '';
+                const age = parseFloat(pet.age) || 0;
+                
+                if (age >= 7) return { name: '熟齡關節保養計畫', desc: `毛孩已經 ${age} 歲進入熟齡期了！建議補充軟骨素，並避免頻繁上下樓梯。`, tag: '高齡照護', icon: 'fa-crutch', color: 'duo-card-yellow' };
+                if (age > 0 && age <= 1) return { name: '幼寵黃金發育期', desc: '目前是社會化與骨骼發育的關鍵期，請給予幼年專用高營養配方！', tag: '幼年任務', icon: 'fa-baby-carriage', color: 'duo-card-yellow' };
+
                 if (b.includes('鬥牛') || b.includes('巴哥') || b.includes('短吻')) return { name: '防衝撞胸背帶', desc: '短吻犬呼吸道短，使用胸背帶可降低頸部壓力。', tag: '專屬裝備', icon: 'fa-vest', color: 'duo-card-yellow' };
                 if (b.includes('柯基') || b.includes('臘腸')) return { name: '護脊斜坡階梯', desc: '短腿犬脊椎負擔大，請避免跳躍沙發或樓梯。', tag: '專屬裝備', icon: 'fa-stairs', color: 'duo-card-yellow' };
                 if (b.includes('哈士奇') || b.includes('邊境') || b.includes('柴犬')) return { name: '益智漏食玩具', desc: '高智商精力旺盛，需要遊戲消耗腦力。', tag: '每日挑戰', icon: 'fa-puzzle-piece', color: 'duo-card-yellow' };
@@ -472,8 +500,8 @@
             const showWarning = (pet.gender === '女' && pet.isNeutered === '未絕育') || noPostToday || urgentCount > 0;
 
             return (
-                <div className="p-4 md:p-8 overflow-y-auto h-full pb-24 md:pb-8 max-w-4xl mx-auto w-full">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div className="p-4 md:p-8 overflow-y-auto h-full pb-32 md:pb-8 max-w-4xl mx-auto w-full">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pt-safe">
                         <div className="flex items-center gap-4">
                             <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3"><span className="text-4xl">🎯</span> 每日任務</h2>
                             <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl px-4 py-2 shadow-[0_4px_0_#e2e8f0] font-black text-[#ffc800] text-xl transform rotate-2">
@@ -489,13 +517,19 @@
                     </div>
 
                     <div className="duo-card p-6 shadow-sm mb-6 bg-white border-b-[8px] border-slate-200">
-                        <div className="flex items-center gap-5 mb-6 border-b-2 border-slate-100 pb-6">
-                            <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-slate-200 flex items-center justify-center text-4xl shadow-inner">
+                        <div className="flex items-start gap-5 mb-6 border-b-2 border-slate-100 pb-6">
+                            <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-slate-200 flex items-center justify-center text-4xl shadow-inner shrink-0 mt-1">
                                 {pet.species === '貓'?'🐱':pet.species === '狗'?'🐶':'🐾'}
                             </div>
                             <div>
                                 <h3 className="text-3xl font-black text-slate-800">{pet.name} 的等級資訊</h3>
-                                <p className="text-[16px] font-extrabold text-slate-400 mt-2 bg-slate-50 px-3 py-1 rounded-lg inline-block border border-slate-200">{pet.breed} · {pet.gender} ({pet.isNeutered})</p>
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                    <span className="text-[14px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">{pet.breed} · {pet.gender} ({pet.isNeutered})</span>
+                                    {pet.age && <span className="text-[14px] bg-[#ddf4ff] text-[#1cb0f6] px-3 py-1 rounded-lg font-black border border-[#1cb0f6]/30">{pet.age} 歲</span>}
+                                    {pet.weight && <span className="text-[14px] bg-[#ddf4ff] text-[#1cb0f6] px-3 py-1 rounded-lg font-black border border-[#1cb0f6]/30">{pet.weight} kg</span>}
+                                    {pet.height && <span className="text-[14px] bg-[#f7fee7] text-[#58a700] px-3 py-1 rounded-lg font-black border border-[#58a700]/30">高 {pet.height} cm</span>}
+                                    {pet.length && <span className="text-[14px] bg-[#f7fee7] text-[#58a700] px-3 py-1 rounded-lg font-black border border-[#58a700]/30">長 {pet.length} cm</span>}
+                                </div>
                             </div>
                         </div>
 
@@ -591,8 +625,10 @@
                 if (!GEMINI_API_KEY) return `⚠️ 您尚未裝備「AI 智慧核心 (API Key)」！\n\n請前往左側「管理設定」，填入您的 Gemini API Key 來解鎖真正的博士智慧！`;
 
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                const petsInfo = userData?.pets?.map(p => `- ${p.name} (${p.species}, ${p.breed}, ${p.gender}, ${p.isNeutered})`).join('\n') || '無詳細資料';
-                const promptText = `你是一位講話像卡通人物、非常熱情但專業的 AI 獸醫博士（類似多鄰國的 Duo 貓頭鷹）。\n使用者的毛孩角色：\n${petsInfo}\n\n使用者諮詢描述：${userText || '（主要上傳了圖片）'}\n\n1. 語氣熱情、幽默，多用表情符號，但醫療建議必須嚴謹。\n2. ⚠️ 若發現嚴重症狀，請用【緊急任務】警示主人立即送醫。\n3. 若有照片，請認真觀察照片給出建議。`;
+                
+                const petsInfo = userData?.pets?.map(p => `- ${p.name} (${p.species}, ${p.breed}, ${p.gender}, ${p.isNeutered}, 歲數:${p.age||'未知'}, 體重:${p.weight||'未知'}kg, 身高:${p.height||'未知'}cm, 體長:${p.length||'未知'}cm)`).join('\n') || '無詳細資料';
+                
+                const promptText = `你是一位講話像卡通人物、非常熱情但專業的 AI 獸醫博士（類似多鄰國的 Duo 貓頭鷹）。\n使用者的毛孩角色：\n${petsInfo}\n\n使用者諮詢描述：${userText || '（主要上傳了圖片）'}\n\n1. 語氣熱情、幽默，多用表情符號，但醫療建議必須嚴謹。\n2. 若有年齡體重等數據，請在回答中適當提及該數據對健康的影響。\n3. ⚠️ 若發現嚴重症狀，請用【緊急任務】警示主人立即送醫。\n4. 若有照片，請認真觀察照片給出建議。`;
 
                 const parts = [];
                 if (imageBase64) {
@@ -633,7 +669,7 @@
 
             return (
                 <div className="flex flex-col h-full w-full bg-polka-dots">
-                    <div className="bg-white/90 backdrop-blur-md border-b-2 border-slate-200 p-4 md:p-6 shrink-0 w-full z-20 shadow-sm">
+                    <div className="bg-white/90 backdrop-blur-md border-b-2 border-slate-200 p-4 md:p-6 shrink-0 w-full z-20 shadow-sm pt-safe">
                         <div className="flex items-center max-w-4xl mx-auto w-full">
                             <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#ffc800] text-white flex items-center justify-center text-2xl md:text-3xl border-b-4 border-[#c68900] mr-4 md:mr-5 shadow-sm shrink-0"><i className="fa-solid fa-user-doctor"></i></div>
                             <div className="overflow-hidden">
@@ -643,7 +679,7 @@
                         </div>
                     </div>
                     
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 w-full" ref={chatContainerRef}>
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 w-full pb-32 md:pb-6" ref={chatContainerRef}>
                         <div className="max-w-4xl mx-auto w-full space-y-6 md:space-y-8">
                             {messages.map((msg, idx) => (
                                 <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -664,7 +700,7 @@
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-white/90 backdrop-blur-md border-t-2 border-slate-200 shrink-0 w-full z-20 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] pb-safe">
+                    <div className="absolute bottom-[90px] md:bottom-0 left-0 right-0 p-4 md:p-5 bg-white/90 backdrop-blur-md border-t-2 border-slate-200 w-full z-20 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] pb-safe">
                         <div className="max-w-4xl mx-auto w-full">
                             {imageAttachment && (
                                 <div className="relative inline-block w-20 h-20 md:w-24 md:h-24 mb-3">
@@ -746,10 +782,10 @@
             }
 
             return (
-                <div className="flex h-screen w-full bg-polka-dots overflow-hidden relative">
+                <div className="flex w-full bg-polka-dots overflow-hidden relative fixed inset-0" style={{ height: '100dvh' }}>
                     {/* 🌟 左側 Sidebar：增強的陰影對比與高度固定 */}
-                    <div className="hidden md:flex flex-col w-[320px] bg-gradient-to-br from-[#ffe066] to-[#fff2a8] border-r-2 border-[#e5e5e5] z-20 h-screen relative shadow-[8px_0_30px_rgba(0,0,0,0.08)]">
-                        <div className="flex-1 overflow-y-auto p-5 min-h-0">
+                    <div className="hidden md:flex flex-col w-[320px] bg-gradient-to-br from-[#ffe066] to-[#fff2a8] border-r-2 border-[#e5e5e5] z-30 h-full relative shadow-[8px_0_30px_rgba(0,0,0,0.08)]">
+                        <div className="flex-1 overflow-y-auto p-5 min-h-0 pt-safe">
                             
                             {/* 🧊 裝飾：毛玻璃質感個人資料卡片 */}
                             <div className="flex items-center gap-4 mb-6 py-3 px-4 rounded-2xl bg-white/40 backdrop-blur-md border-2 border-white/60 shadow-sm relative overflow-hidden">
@@ -773,14 +809,14 @@
                                 </button>
                             </div>
                         </div>
-                        <div className="shrink-0 p-5 border-t-2 border-white/40 space-y-3">
+                        <div className="shrink-0 p-5 border-t-2 border-white/40 space-y-3 pb-safe">
                             <button onClick={() => setShowSettings(true)} className="w-full duo-btn-white py-3 font-black text-[15px] border-b-[6px] flex items-center justify-center text-slate-700 bg-white/90 hover:bg-white"><i className="fa-solid fa-gear mr-2 text-lg"></i> 管理設定</button>
                             <button onClick={handleLogout} className="w-full duo-btn-white py-3 text-[#ff4b4b] font-black text-[15px] border-b-[6px] flex items-center justify-center bg-white/90 hover:bg-white"><i className="fa-solid fa-right-from-bracket mr-2 text-lg"></i> 登出</button>
                         </div>
                     </div>
 
                     {/* 右側主內容區 */}
-                    <div className="flex-1 flex flex-col relative w-full h-screen overflow-hidden bg-polka-dots">
+                    <div className="flex-1 flex flex-col relative w-full h-full overflow-hidden bg-polka-dots z-10">
                         <div className="md:hidden h-[80px] bg-white/90 backdrop-blur-md flex items-center justify-between px-6 border-b-2 border-slate-200 shrink-0 z-20 pt-safe shadow-sm">
                             <div className="font-black text-3xl text-[#58cc02] tracking-tight flex items-center gap-3 drop-shadow-sm"><i className="fa-solid fa-paw"></i> 寵物村</div>
                             <div className="flex items-center gap-5">
@@ -794,7 +830,7 @@
                             {activeTab === 'aivet' && <AIVetTab userData={userData} />}
                         </div>
 
-                        <div className="md:hidden absolute bottom-0 w-full h-[90px] pb-safe bg-white/95 backdrop-blur-md border-t-2 border-slate-200 flex justify-around items-center text-xs text-slate-400 z-20">
+                        <div className="md:hidden absolute bottom-0 w-full h-[90px] bg-white/95 backdrop-blur-md border-t-2 border-slate-200 flex justify-around items-center text-xs text-slate-400 z-30 pb-safe">
                             <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center justify-center w-full h-full transition-all ${activeTab === 'home' ? 'text-[#1cb0f6] font-black' : 'font-extrabold'}`}><i className={`fa-solid fa-house text-[28px] mb-1.5 ${activeTab==='home'?'mb-2 bg-[#ddf4ff] p-2 rounded-xl border-2 border-[#1cb0f6] text-[#1cb0f6] animate-wiggle':''}`}></i>{activeTab!=='home' && '動態'}</button>
                             <button onClick={() => setActiveTab('reminders')} className={`flex flex-col items-center justify-center w-full h-full transition-all ${activeTab === 'reminders' ? 'text-[#1cb0f6] font-black' : 'font-extrabold'}`}><i className={`fa-solid fa-list-check text-[28px] mb-1.5 ${activeTab==='reminders'?'mb-2 bg-[#ddf4ff] p-2 rounded-xl border-2 border-[#1cb0f6] text-[#1cb0f6] animate-wiggle':''}`}></i>{activeTab!=='reminders' && '任務'}</button>
                             <button onClick={() => setActiveTab('aivet')} className={`flex flex-col items-center justify-center w-full h-full transition-all ${activeTab === 'aivet' ? 'text-[#1cb0f6] font-black' : 'font-extrabold'}`}><i className={`fa-solid fa-user-doctor text-[28px] mb-1.5 ${activeTab==='aivet'?'mb-2 bg-[#ddf4ff] p-2 rounded-xl border-2 border-[#1cb0f6] text-[#1cb0f6] animate-wiggle':''}`}></i>{activeTab!=='aivet' && '博士'}</button>
