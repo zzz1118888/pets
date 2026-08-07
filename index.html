@@ -2,9 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- 💡 手机端修复 1：加入 viewport-fit=cover 适配刘海屏，并锁定禁止屏幕乱缩放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>寵物每一天 - 遊戲化升級版</title>
+    <title>寵物每一天 - 全物種大數據升級版</title>
     <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -14,7 +13,6 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 💡 手机端修复 2：使用 100dvh (动态视口高度) 彻底解决 URL Bar 遮挡问题 */
         html, body { 
             height: 100dvh; width: 100%; margin: 0; padding: 0; 
             overflow: hidden; position: fixed; touch-action: none; 
@@ -23,11 +21,9 @@
         }
         ::-webkit-scrollbar { display: none; }
         
-        /* 💡 手机端修复 3：添加 iPhone 刘海屏与底部黑线的「安全区 (Safe Area)」Padding */
         .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
         .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
         
-        /* 🍄 裝飾：右側遊樂園波點背景 */
         .bg-polka-dots {
             background-color: #ecfdf5; 
             background-image: radial-gradient(#a7f3d0 2.5px, transparent 2.5px); 
@@ -48,7 +44,6 @@
         .duo-btn-white:active { border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
         .duo-btn-white.active-tab { border-color: #1cb0f6; border-bottom-color: #1cb0f6; color: #1cb0f6; background-color: #ddf4ff; border-bottom-width: 2px; transform: translateY(4px); margin-bottom: 4px; }
 
-        /* 🍞 裝飾：增強卡片的浮起與 3D 陰影反饋 */
         .duo-card { background-color: #ffffff; border: 2px solid #cbd5e1; border-radius: 1.5rem; box-shadow: 0 6px 0 #cbd5e1; margin-bottom: 6px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .duo-card:hover { transform: translateY(-4px); box-shadow: 0 10px 0 #94a3b8; border-color: #94a3b8; }
         .duo-card-yellow { background-color: #ffc800; border: 2px solid #c68900; border-radius: 1.5rem; color: white; box-shadow: 0 6px 0 #c68900; margin-bottom: 6px; }
@@ -72,11 +67,11 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const DB_KEY_USERS = 'petApp_v13_users'; 
-        const DB_KEY_POSTS = 'petApp_v13_posts'; 
-        const DB_KEY_AUTH = 'petApp_v13_auth';   
-        const DB_KEY_CURRENT_USER = 'petApp_v13_currentUser'; 
-        const DB_KEY_API_TOKEN = 'petApp_v13_geminiToken';
+        const DB_KEY_USERS = 'petApp_v16_users'; 
+        const DB_KEY_POSTS = 'petApp_v16_posts'; 
+        const DB_KEY_AUTH = 'petApp_v16_auth';   
+        const DB_KEY_CURRENT_USER = 'petApp_v16_currentUser'; 
+        const DB_KEY_API_TOKEN = 'petApp_v16_geminiToken';
 
         const defaultPosts = [
             { id: 2, author: 'LeoMom', avatar: '👩', petName: 'Leo', time: '1 小時前', timestamp: Date.now() - 3600000, content: '今天天氣超好，帶 Leo 去了寵物公園，結果牠交到了新朋友！跑了一下午回家直接秒睡 🤣', image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80', likes: 12, likedByMe: false, comments: [{id: 1, author: '王大明', text: '太可愛了吧！'}] },
@@ -177,7 +172,7 @@
                         </div>
 
                         <div className="pt-4 border-t-2 border-slate-100">
-                            <label className="block text-sm font-extrabold text-[#1cb0f6] mb-4 uppercase tracking-wide"><i className="fa-solid fa-ruler"></i> 精準體態數據 (選填)</label>
+                            <label className="block text-sm font-extrabold text-[#1cb0f6] mb-4 uppercase tracking-wide"><i className="fa-solid fa-ruler"></i> 精準體態數據 (推薦填寫)</label>
                             <div className="grid grid-cols-2 gap-4">
                                 <div><input type="number" step="0.1" className="w-full duo-input p-4 text-[15px]" value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} placeholder="年齡 (歲)" /></div>
                                 <div><input type="number" step="0.1" className="w-full duo-input p-4 text-[15px]" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} placeholder="體重 (kg)" /></div>
@@ -220,7 +215,7 @@
                                 {pets.map(p => (
                                     <div key={p.id} className="duo-card p-4 flex items-center justify-between border-2 border-[#e2e8f0] shadow-sm mb-0">
                                         <div className="flex items-center gap-5">
-                                            <div className="w-16 h-16 rounded-full bg-[#f8fafc] flex items-center justify-center text-4xl border-2 border-[#e2e8f0] shadow-inner">{p.species === '貓' ? '🐱' : p.species === '狗' ? '🐶' : '🐾'}</div>
+                                            <div className="w-16 h-16 rounded-full bg-[#f8fafc] flex items-center justify-center text-4xl border-2 border-[#e2e8f0] shadow-inner">{p.species === '貓' ? '🐱' : p.species === '狗' ? '🐶' : p.species === '鳥' ? '🐦' : p.species === '兔/鼠' ? '🐰' : '🦎'}</div>
                                             <div>
                                                 <p className="font-black text-xl text-slate-800">{p.name}</p>
                                                 <p className="text-[14px] text-slate-500 font-extrabold mt-1">{p.breed}</p>
@@ -253,7 +248,7 @@
             if (isCreatingPet) return <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm pt-safe pb-safe"><PetForm title="解鎖新角色" onSave={(newPet) => { onUpdateUser({ ...userData, pets: [...userData.pets, newPet] }); setIsCreatingPet(false); }} onCancel={() => setIsCreatingPet(false)} /></div>;
 
             return (
-                <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm pt-safe pb-safe">
+                <div className="absolute inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-2 md:p-4 backdrop-blur-sm pt-safe pb-safe">
                     <div className="bg-[#f8fafc] w-full max-w-lg rounded-3xl overflow-hidden flex flex-col max-h-[90dvh] border-4 border-white shadow-2xl">
                         <div className="p-6 flex justify-between items-center border-b-2 border-slate-200 bg-white shrink-0">
                             <h3 className="font-black text-2xl text-slate-800">玩家與系統設定</h3>
@@ -286,7 +281,7 @@
                                 {userData.pets.map(p => (
                                     <div key={p.id} className="duo-card p-5 flex justify-between items-center bg-white border-slate-200 shadow-sm mb-0">
                                         <div className="flex items-center gap-5">
-                                            <div className="w-14 h-14 rounded-full bg-slate-100 text-3xl flex items-center justify-center border-2 border-slate-200">{p.species === '貓'?'🐱':p.species === '狗'?'🐶':'🐾'}</div>
+                                            <div className="w-14 h-14 rounded-full bg-slate-100 text-3xl flex items-center justify-center border-2 border-slate-200">{p.species === '貓'?'🐱':p.species === '狗'?'🐶':p.species === '鳥'?'🐦':p.species === '兔/鼠'?'🐰':'🦎'}</div>
                                             <div>
                                                 <p className="font-black text-xl text-slate-800">{p.name}</p>
                                                 <p className="text-[13px] text-slate-500 mt-1 font-extrabold">{p.breed}</p>
@@ -434,7 +429,7 @@
                                         ))}
                                         {commentingOn === post.id && (
                                             <div className="flex gap-3 mt-5 pt-5 border-t-2 border-slate-200">
-                                                <input type="text" className="flex-1 duo-input p-3.5 text-[15px] bg-white shadow-sm" placeholder={`回覆 ${post.author}...`} value={commentTexts[post.id] || ''} onChange={e => setCommentTexts({...commentTexts, [post.id]: e.target.value})} onKeyPress={e => e.key === 'Enter' && submitComment(post.id)} />
+                                                <input type="text" className="flex-1 duo-input p-3.5 text-[15px] bg-white shadow-sm" placeholder={`回覆 ${post.author}...`} value={commentTexts[post.id] || ''} onChange={e => setCommentTexts({...commentTexts, [post.id]: e.target.value})} onKeyPress={e => e.key === 'Enter' && submitComment(post.id)} autoFocus />
                                                 <button onClick={() => submitComment(post.id)} className="duo-btn-blue px-6 font-black text-[15px] border-b-4">回覆</button>
                                             </div>
                                         )}
@@ -454,27 +449,126 @@
 
             const pet = userData.pets.find(p => p.id === selectedPetId) || userData.pets[0];
 
+            // 💡 大數據：全物種 x 歲數 x 體重 飲食建議
+            const getDietRecommendation = (pet) => {
+                const age = parseFloat(pet.age) || 0;
+                const weight = parseFloat(pet.weight) || 0;
+                const b = pet.breed || '';
+
+                if (pet.species === '狗') {
+                    if (age > 0 && age <= 1) return "【幼犬黃金發育期】建議餵食『高蛋白、高鈣的幼犬專用乾糧』，可稍微泡軟幫助消化。採取「少量多餐」（每日3-4餐），為骨骼和肌肉打好基礎。";
+                    if (age >= 7) return "【熟齡犬保養期】建議轉換為『熟齡犬專用糧』，特色是低卡、易咀嚼。務必挑選富含「葡萄糖胺」與「軟骨素」的配方來保護關節。";
+                    if (weight >= 20) return "【大型成犬配方】體重較重，關節負擔大。建議挑選『顆粒較大的成犬糧』避免狼吞虎嚥，並注重鈣磷比與關節保護。";
+                    if (weight > 15 && (b.includes('柯基') || b.includes('臘腸'))) return "【體重控制警報】短腿犬過重會嚴重壓迫脊椎！建議餵食『低脂減肥糧』，嚴格控制零食。";
+                    return "【成犬均衡配方】建議餵食『無穀或低敏成犬乾糧』。注意每日熱量攝取，避免發胖。";
+                } else if (pet.species === '貓') {
+                    if (age > 0 && age <= 1) return "【幼貓急速生長期】建議餵食『幼貓專用主食罐或高營養乾糧』，需極高蛋白質與脂肪。適當補充牛磺酸幫助眼睛與腦部發育。";
+                    if (age >= 7) return "【熟齡貓護理期】建議轉換為『熟齡貓配方』，重點在於「適度降低磷、鈉含量」以保護腎臟。多餵食濕食增加水分攝取。";
+                    if (weight >= 6) return "【胖胖貓減重計畫】體重過重容易引發糖尿病和關節炎！建議改餵『低碳水、高蛋白的減重主食罐』，嚴格定時定量。";
+                    return "【成貓水分管理】建議採取『半濕食或全濕食』（主食罐加水）。貓咪天生不愛喝水，濕食能有效預防泌尿道及腎臟疾病。";
+                } else if (pet.species === '鳥') {
+                    if (age > 0 && age <= 0.5) return "【幼鳥學吃期】需定時溫水餵食專用鳥奶粉，並逐漸提供滋養丸碎粒與泡軟穀物，引導斷奶學吃。";
+                    if (age >= 10) return "【老鳥養生期】消化能力下降，建議提供易消化的滋養丸，補充水溶性鈣質與維他命，避免高脂瓜子。";
+                    return "【成鳥日常飲食】以『高品質滋養丸』為主食（佔70%），搭配適量的新鮮無毒蔬果與少許穀物種子。嚴禁酪梨、巧克力、蔥蒜！";
+                } else if (pet.species === '兔/鼠') {
+                    if (age > 0 && age <= 0.5) return "【幼寵成長期】幼兔/幼天竺鼠需無限量供應『苜蓿草』補充鈣質與蛋白質，搭配少量幼年專用飼料。";
+                    if (age >= 5) return "【熟齡草食期】牙齒與腸胃較脆弱，建議提供較軟的提摩西草（如三番草），並考慮補充關節保養保健品。";
+                    return "【成寵牧草配方】無限量供應『提摩西牧草』維持腸胃蠕動與磨牙，早晚給予少量無穀飼料與適量新鮮蔬菜（鼠類需注意維生素C補充）。";
+                } else {
+                    if (age > 0 && age <= 1) return "【特寵成長期】幼年爬蟲/兩棲類需要高頻率餵食，活餌需沾裹『高鈣粉與維生素D3』，確保骨骼健康發育。";
+                    return "【特寵日常維持】爬蟲類對飲食需求差異極大（肉食/植食/雜食），請依據物種提供專用飼料或活餌，並定期補充爬蟲專用鈣粉。";
+                }
+            };
+
+            // 💡 大數據：被動技能全物種支援
             const getBreedRecommendation = (pet) => {
                 const b = pet.breed || '';
                 const age = parseFloat(pet.age) || 0;
                 
-                if (age >= 7) return { name: '熟齡關節保養計畫', desc: `毛孩已經 ${age} 歲進入熟齡期了！建議補充軟骨素，並避免頻繁上下樓梯。`, tag: '高齡照護', icon: 'fa-crutch', color: 'duo-card-yellow' };
-                if (age > 0 && age <= 1) return { name: '幼寵黃金發育期', desc: '目前是社會化與骨骼發育的關鍵期，請給予幼年專用高營養配方！', tag: '幼年任務', icon: 'fa-baby-carriage', color: 'duo-card-yellow' };
+                if (pet.species === '狗' || pet.species === '貓') {
+                    if (age >= 7) return { name: '熟齡關節保養計畫', desc: `毛孩已經 ${age} 歲進入熟齡期了！建議補充軟骨素，並避免頻繁上下樓梯。`, tag: '高齡照護', icon: 'fa-crutch', color: 'duo-card-yellow' };
+                    if (age > 0 && age <= 1) return { name: '幼寵社會化黃金期', desc: '目前是社會化與性格養成的關鍵期，請多用正向獎勵進行基礎訓練！', tag: '幼年任務', icon: 'fa-baby-carriage', color: 'duo-card-yellow' };
+                } else if (pet.species === '鳥') {
+                    if (age > 0 && age <= 0.5) return { name: '幼鳥保溫與防撞', desc: '幼鳥羽毛未豐且飛行不穩，需注意環境保溫並避免籠內有尖銳物。', tag: '幼鳥照護', icon: 'fa-temperature-arrow-up', color: 'duo-card-yellow' };
+                } else if (pet.species === '兔/鼠') {
+                    if (age >= 5) return { name: '熟齡足底防護', desc: '老兔/老鼠足底易長蹠疣，請鋪設厚軟墊材並定期檢查腳底。', tag: '高齡照護', icon: 'fa-shoe-prints', color: 'duo-card-yellow' };
+                }
 
                 if (b.includes('鬥牛') || b.includes('巴哥') || b.includes('短吻')) return { name: '防衝撞胸背帶', desc: '短吻犬呼吸道短，使用胸背帶可降低頸部壓力。', tag: '專屬裝備', icon: 'fa-vest', color: 'duo-card-yellow' };
                 if (b.includes('柯基') || b.includes('臘腸')) return { name: '護脊斜坡階梯', desc: '短腿犬脊椎負擔大，請避免跳躍沙發或樓梯。', tag: '專屬裝備', icon: 'fa-stairs', color: 'duo-card-yellow' };
                 if (b.includes('哈士奇') || b.includes('邊境') || b.includes('柴犬')) return { name: '益智漏食玩具', desc: '高智商精力旺盛，需要遊戲消耗腦力。', tag: '每日挑戰', icon: 'fa-puzzle-piece', color: 'duo-card-yellow' };
                 if (b.includes('橘貓') || b.includes('胖')) return { name: '體重控制計畫', desc: '保護關節與心血管健康，請嚴格控管熱量！', tag: '健康目標', icon: 'fa-weight-scale', color: 'duo-card-yellow' };
                 if (b.includes('英國短毛') || b.includes('波斯')) return { name: '每日梳毛任務', desc: '毛髮濃密，需加強排毛，避免引發毛球症。', tag: '日常保養', icon: 'fa-seedling', color: 'duo-card-yellow' };
-                return pet.species === '貓' ? { name: '優質蛋白補給', desc: '符合肉食天性，增加水分攝取維持肌肉量。', tag: '營養目標', icon: 'fa-fish', color: 'duo-card-yellow' } : { name: '每日維他命', desc: '補充微量元素，維持毛髮亮麗與增強免疫力。', tag: '營養目標', icon: 'fa-pills', color: 'duo-card-yellow' };
+                
+                if (pet.species === '鳥') return { name: '防風保暖與防咬', desc: '鳥類對溫度敏感，需保暖。給予墨魚骨或啃咬玩具防喙部長太長。', tag: '環境配置', icon: 'fa-feather', color: 'duo-card-yellow' };
+                if (pet.species === '兔/鼠') return { name: '安全磨牙與躲避洞', desc: '牙齒會不斷生長需啃咬木，天性膽小需提供躲避屋建立安全感。', tag: '健康目標', icon: 'fa-carrot', color: 'duo-card-yellow' };
+                if (pet.species === '爬蟲/其他') return { name: '溫濕度與 UVB 監控', desc: '需嚴格控制環境溫濕度，並提供充足的 UVB 照射以利鈣質吸收。', tag: '環境配置', icon: 'fa-temperature-half', color: 'duo-card-yellow' };
+
+                return pet.species === '貓' ? { name: '貓抓板與跳台', desc: '滿足貓咪磨爪與垂直空間跳躍的天性。', tag: '環境配置', icon: 'fa-cat', color: 'duo-card-yellow' } : { name: '防暴衝牽繩', desc: '外出安全第一，避免突發狀況掙脫。', tag: '外出裝備', icon: 'fa-dog', color: 'duo-card-yellow' };
             };
 
-            const addReminder = (petId) => {
-                const data = newReminderData[petId];
-                if(!data || !data.text?.trim() || !data.date) return alert('請填寫任務與日期！');
-                const updated = [...reminders, { id: Date.now(), petId, text: data.text, targetDate: data.date, completed: false }];
+            // 💡 大數據：全物種 x 新手必備任務推薦
+            const getSuggestedTasks = (pet) => {
+                let daily = ['💧 更換乾淨飲水', '🍚 準備美味早/晚餐'];
+                let periodic = [];
+                const age = parseFloat(pet.age) || 0;
+
+                if (pet.species === '狗') {
+                    daily.push('🪥 刷牙或給予潔牙骨', '🦮 帶出門散步尿尿', '🐾 擦拭腳掌與清潔');
+                    periodic.push('💊 每月體內外驅蟲', '💉 年度疫苗補強檢查', '🛁 洗澡與擠肛門腺', '✂️ 修剪指甲與腳底毛');
+                    if (pet.breed.includes('長毛') || pet.breed.includes('貴賓') || pet.breed.includes('博美')) periodic.push('💈 預約美容大修剪');
+                    if (age >= 7) periodic.push('🩺 熟齡犬半年全套健檢');
+                    else periodic.push('🩺 年度基礎健康檢查');
+                } else if (pet.species === '貓') {
+                    daily.push('🪥 刷牙或給予潔牙骨', '🧹 剷除貓砂盆便便', '🧶 逗貓棒陪玩 15 分鐘');
+                    periodic.push('💊 每月體內外驅蟲', '💉 年度疫苗補強檢查', '✂️ 定期修剪指甲', '🧶 餵食化毛膏/排毛粉');
+                    if (age >= 7) {
+                        daily.push('💧 檢查今日喝水量');
+                        periodic.push('🩺 熟齡貓腎臟與甲狀腺血檢');
+                    } else {
+                        periodic.push('🩺 年度基礎健康檢查');
+                    }
+                } else if (pet.species === '鳥') {
+                    daily.push('🧹 清理籠子底部托盤', '🥬 準備新鮮蔬果');
+                    periodic.push('✂️ 定期修剪指甲', '🛁 提供溫水讓鳥兒沐浴');
+                    if (age < 1) daily.push('🍼 定時餵食鳥奶粉/學吃');
+                    periodic.push('🩺 鳥禽專科定期健檢', '🦠 體內外驅蟲檢查');
+                } else if (pet.species === '兔/鼠') {
+                    daily.push('🧹 清理便盆與墊材', '🌾 補充無限量牧草');
+                    periodic.push('✂️ 定期修剪指甲', '🩺 牙齒與臼齒健康檢查');
+                    if (pet.breed.includes('長毛')) daily.push('✂️ 梳理毛髮防毛球症');
+                    periodic.push('🦠 定期驅蟲與皮毛檢查');
+                } else {
+                    daily.push('🧹 清潔居住環境', '🌡️ 檢查環境溫濕度');
+                    periodic.push('💡 定期更換 UVB 燈管', '🩺 特寵專科健康檢查', '🦠 糞便寄生蟲檢查');
+                }
+
+                if (pet.isNeutered === '未絕育' && (pet.species === '狗' || pet.species === '貓' || pet.species === '兔/鼠')) {
+                    if (age >= 0.5 || !age) periodic.push('🏥 諮詢與安排絕育手術');
+                }
+
+                return { daily, periodic };
+            };
+
+            const getTodayDateString = () => {
+                const d = new Date();
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            };
+
+            const addReminder = (petId, predefinedText = null) => {
+                const text = predefinedText || newReminderData[petId]?.text;
+                const targetDate = newReminderData[petId]?.date || getTodayDateString();
+                
+                if(!text || !text.trim()) return alert('請填寫任務內容！');
+                
+                if (reminders.some(r => r.text === text && r.petId === petId && r.targetDate === targetDate)) return;
+
+                const updated = [...reminders, { id: Date.now() + Math.random(), petId, text: text, targetDate: targetDate, completed: false }];
                 setReminders(updated); onUpdateUser({...userData, customReminders: updated});
-                setNewReminderData({...newReminderData, [petId]: { text: '', date: '' }});
+                
+                if (!predefinedText) {
+                    setNewReminderData({...newReminderData, [petId]: { text: '', date: '' }});
+                }
             };
 
             const toggleCompleted = (id) => {
@@ -494,6 +588,7 @@
             };
 
             const rec = getBreedRecommendation(pet);
+            const suggested = getSuggestedTasks(pet);
             const petReminders = reminders.filter(r => r.petId === pet.id);
             const urgentCount = petReminders.filter(r => !r.completed && isTodayOrOverdue(r.targetDate)).length;
             const noPostToday = !hasPostedToday(pet.name);
@@ -519,7 +614,8 @@
                     <div className="duo-card p-6 shadow-sm mb-6 bg-white border-b-[8px] border-slate-200">
                         <div className="flex items-start gap-5 mb-6 border-b-2 border-slate-100 pb-6">
                             <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-slate-200 flex items-center justify-center text-4xl shadow-inner shrink-0 mt-1">
-                                {pet.species === '貓'?'🐱':pet.species === '狗'?'🐶':'🐾'}
+                                {/* 💡 頭像 Emoji 完美適配全物種 */}
+                                {pet.species === '貓' ? '🐱' : pet.species === '狗' ? '🐶' : pet.species === '鳥' ? '🐦' : pet.species === '兔/鼠' ? '🐰' : '🦎'}
                             </div>
                             <div>
                                 <h3 className="text-3xl font-black text-slate-800">{pet.name} 的等級資訊</h3>
@@ -533,14 +629,19 @@
                             </div>
                         </div>
 
-                        <div className={`relative overflow-hidden p-8 mb-8 ${rec.color}`}>
+                        <div className={`relative overflow-hidden p-6 md:p-8 mb-8 ${rec.color}`}>
                             <div className="relative z-10">
                                 <div className="flex justify-between items-center mb-4">
                                     <p className="text-sm font-black uppercase tracking-widest text-white/90 drop-shadow-sm"><i className="fa-solid fa-star mr-2 text-white"></i> 專屬被動技能</p>
                                     <span className="text-[12px] bg-white/30 px-3 py-1.5 rounded-full font-black border-2 border-white/40 shadow-sm">{rec.tag}</span>
                                 </div>
                                 <p className="font-black text-3xl mb-3 drop-shadow-md">{rec.name}</p>
-                                <p className="text-[16px] font-extrabold text-white/95 leading-relaxed drop-shadow-sm">{rec.desc}</p>
+                                <p className="text-[16px] font-extrabold text-white/95 leading-relaxed drop-shadow-sm mb-6">{rec.desc}</p>
+                                
+                                <div className="bg-white/20 rounded-2xl p-5 border border-white/30 backdrop-blur-sm shadow-sm">
+                                    <p className="text-[15px] font-black text-white mb-2"><i className="fa-solid fa-bowl-food mr-2"></i> 專屬飲食建議 <span className="text-xs opacity-80 font-bold ml-1">(依據歲數與體重)</span></p>
+                                    <p className="text-[15px] font-bold text-white/90 leading-relaxed">{getDietRecommendation(pet)}</p>
+                                </div>
                             </div>
                             <i className={`fa-solid ${rec.icon} absolute -right-6 -bottom-6 text-9xl text-white/20 transform -rotate-12`}></i>
                         </div>
@@ -597,13 +698,35 @@
                                 }
                             </div>
 
-                            <div className="flex flex-col md:flex-row gap-4 pt-8 border-t-2 border-slate-100">
-                                <input type="text" className="flex-1 duo-input p-4 text-[16px] bg-slate-50 shadow-inner" placeholder="輸入新任務 (如：點除蚤藥)" 
-                                    value={newReminderData[pet.id]?.text || ''} onChange={e => setNewReminderData({...newReminderData, [pet.id]: { ...newReminderData[pet.id], text: e.target.value }})} />
-                                <div className="flex gap-3">
-                                    <input type="date" className="flex-1 md:w-[150px] duo-input p-4 text-[16px] text-slate-600 bg-slate-50 font-black shadow-inner" 
-                                        value={newReminderData[pet.id]?.date || ''} onChange={e => setNewReminderData({...newReminderData, [pet.id]: { ...newReminderData[pet.id], date: e.target.value }})} />
-                                    <button onClick={() => addReminder(pet.id)} className="duo-btn-green px-8 py-4 font-black text-[16px] border-b-4 tracking-widest text-lg">新增</button>
+                            <div className="pt-8 border-t-2 border-slate-100">
+                                <p className="text-[16px] font-black text-slate-800 mb-4"><i className="fa-solid fa-lightbulb text-[#ffc800] mr-2"></i> 新手必備：點擊快速加入</p>
+                                
+                                <p className="text-[13px] font-extrabold text-slate-500 mb-3 ml-1">🌞 每日日常照顧</p>
+                                <div className="flex flex-wrap gap-2.5 mb-5">
+                                    {suggested.daily.map(task => (
+                                        <button key={task} onClick={() => addReminder(pet.id, task)} className="text-[14px] font-black text-[#1cb0f6] bg-[#ddf4ff] border-2 border-[#1cb0f6]/30 px-4 py-2 rounded-full hover:bg-[#1cb0f6] hover:text-white transition-colors active:scale-95 shadow-sm">
+                                            + {task}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <p className="text-[13px] font-extrabold text-slate-500 mb-3 ml-1">🗓️ 定期健康與美容</p>
+                                <div className="flex flex-wrap gap-2.5 mb-8">
+                                    {suggested.periodic.map(task => (
+                                        <button key={task} onClick={() => addReminder(pet.id, task)} className="text-[14px] font-black text-[#58cc02] bg-[#f7fee7] border-2 border-[#58a700]/30 px-4 py-2 rounded-full hover:bg-[#58cc02] hover:text-white transition-colors active:scale-95 shadow-sm">
+                                            + {task}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-4 pt-6 border-t-2 border-slate-100">
+                                    <input type="text" className="flex-1 duo-input p-4 text-[16px] bg-slate-50 shadow-inner" placeholder="或輸入自訂任務 (如：買零食)" 
+                                        value={newReminderData[pet.id]?.text || ''} onChange={e => setNewReminderData({...newReminderData, [pet.id]: { ...newReminderData[pet.id], text: e.target.value }})} />
+                                    <div className="flex gap-3">
+                                        <input type="date" className="flex-1 md:w-[150px] duo-input p-4 text-[16px] text-slate-600 bg-slate-50 font-black shadow-inner" 
+                                            value={newReminderData[pet.id]?.date || ''} onChange={e => setNewReminderData({...newReminderData, [pet.id]: { ...newReminderData[pet.id], date: e.target.value }})} />
+                                        <button onClick={() => addReminder(pet.id)} className="duo-btn-green px-8 py-4 font-black text-[16px] border-b-4 tracking-widest text-lg">新增</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
